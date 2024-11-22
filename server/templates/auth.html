@@ -4,7 +4,8 @@
   <base href="." />
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login - FalconVPN</title>
+  <title>DanVPN - Простой и быстрый VPN-сервис</title>
+  <link rel="stylesheet" href="../static/css/styles.css">
   <link rel="stylesheet" href="../static/css/navbar.css">
   <link rel="stylesheet" href="../static/css/auth.css">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
@@ -20,14 +21,15 @@
         DanVPN
       </a>
       <div class="nav-links">
-        <a href="/vpn/pricing">Pricing</a>
-        <a href="/vpn/instructions">Instructions</a>
-        <a href="/vpn/support">Support</a>
-        <a href="/vpn/contact">Contact</a>
-        <a href="/vpn/profile" class="cta-button">Login</a>
+        <!-- <a href="/vpn/pricing">Pricing</a>
+        <a href="/vpn/instructions">Instructions</a> -->
+        <a href="/bot/bug/create">Техподдержка</a>
+        <!-- <a href="/vpn/contact">Contact</a> -->
+        <a href="/vpn/profile" class="cta-button">Войти</a>
       </div>
     </div>
   </nav>
+
 
   <div class="auth-container">
     <h2 style="text-align: center; margin-bottom: 2rem;">Login to FalconVPN</h2>
@@ -70,6 +72,19 @@
         d="M12,2C6.48,2 2,6.48 2,12s4.48,10 10,10s10-4.48 10-10S17.52,2 12,2z M16.64,8.8c-0.15,1.58 -0.8,5.42 -1.13,7.19c-0.14,0.75 -0.42,1 -0.69,1.02c-0.58,0.05 -1.02,-0.38 -1.58,-0.75c-0.88,-0.58 -1.38,-0.94 -2.23,-1.5c-0.99,-0.65 -0.35,-1.01 0.22,-1.59c0.15,-0.15 2.71,-2.48 2.76,-2.69c0.01,-0.03 0.01,-0.14 -0.05,-0.2c-0.06,-0.06 -0.16,-0.04 -0.23,-0.02c-0.1,0.02 -1.62,1.03 -4.57,3.03c-0.43,0.3 -0.82,0.45 -1.17,0.44c-0.38,-0.01 -1.12,-0.22 -1.67,-0.4c-0.67,-0.22 -1.21,-0.34 -1.16,-0.72c0.02,-0.2 0.29,-0.4 0.81,-0.6c3.17,-1.38 5.29,-2.29 6.37,-2.75c3.03,-1.31 3.66,-1.54 4.07,-1.54c0.09,0 0.29,0.02 0.42,0.12c0.11,0.09 0.14,0.21 0.15,0.29c0.01,0.08 0.02,0.27 0,0.42z" />
     </svg>
   </a>
+  <!-- <footer class="footer">
+    <div class="footer-content">
+      <div class="footer-links">
+        <a href="/vpn/about">О нас</a>
+        <a href="/vpn/docs/src.html">Разработчикам</a>
+        <a href="/vpn/privacy">Privacy Policy</a>
+        <a href="https://github.com/daniil-mazurov/vpn_dan_bot">GitHub</a>
+      </div>
+      <div class="footer-bottom">
+        © 2024 DanVPN. All rights reserved.
+      </div>
+    </div>
+  </footer> -->
 
   <script src="../static/js/navbar.js"></script>
   <script>
@@ -91,7 +106,7 @@
 
       async function sendCodeRequest(telegramId) {
         try {
-          const response = await fetch('https://falconvpn.com/send_code', {
+          const response = await fetch('/vpn/send_code', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json'
@@ -112,7 +127,7 @@
 
       async function verifyCode(telegramId, code) {
         try {
-          const response = await fetch('https://falconvpn.com/verify_code', {
+          const response = await fetch('/vpn/verify_code', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json'
@@ -209,7 +224,7 @@
           hideError(verificationCode, verificationCodeError);
           const verifyResult = await verifyCode(telegramInput.value, verificationCode.value);
           if (verifyResult) {
-            window.location.href = '/dashboard';
+            window.location.href = '/vpn/profile';
           } else {
             showError(verificationCode, verificationCodeError);
             verificationCodeError.textContent = 'Invalid verification code. Please try again.';

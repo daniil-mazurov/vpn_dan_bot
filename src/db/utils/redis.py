@@ -1,6 +1,7 @@
 """Функционал для работы с Redis."""
 
 import logging
+from collections.abc import Iterable, Mapping
 from datetime import timedelta
 from types import NoneType
 from typing import Union
@@ -50,11 +51,16 @@ class CashManager:
         """
         results = await execute_redis_query(self.pipe)
 
-        validated_results = [
-            self.model(**result)
-            for result in results
-            if result and isinstance(result, dict)
-        ]  # TODO а валидирует то только словари получается
+        validated_results = []
+        for result in results:
+            if result and isinstance(result, (dict, str, tuple, list)):
+                match result:
+                    case Mapping():
+                        validated_results.append(self.model(**result))
+                    case Iterable():
+                        validated_results.append(self.model(*result))
+                    case _:
+                        validated_results.append(self.model(result))
 
         if len(validated_results):
             return validated_results
@@ -84,6 +90,8 @@ class CashManager:
                     value if type(value) in self.redis_types else str(value)
                     for value in data
                 }
+            case _:
+                return data
 
     async def add(
         self,

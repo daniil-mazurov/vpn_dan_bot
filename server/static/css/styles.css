@@ -601,3 +601,122 @@ body {
     color: var(--accent);
     margin-right: 0.5rem;
 }
+
+
+.privacy-container {
+    max-width: 800px;
+    margin: 120px auto 60px;
+    padding: 2rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.privacy-container h1 {
+    text-align: center;
+    margin-bottom: 2rem;
+    font-size: 2.5rem;
+    color: var(--accent);
+}
+
+.privacy-container h2 {
+    color: var(--accent);
+    margin: 2rem 0 1rem;
+    font-size: 1.5rem;
+}
+
+.privacy-container p {
+    margin-bottom: 1rem;
+}
+
+.privacy-container ul {
+    margin: 1rem 0 1rem 2rem;
+}
+
+.privacy-container li {
+    margin-bottom: 0.5rem;
+}
+
+.last-updated {
+    text-align: right;
+    font-style: italic;
+    color: rgba(255, 255, 255, 0.6);
+    margin-top: 2rem;
+    font-size: 0.9rem;
+}
+
+.contact-section {
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.email-link {
+    color: var(--accent);
+    text-decoration: none;
+    transition: color 0.3s;
+}
+
+.email-link:hover {
+    color: #0052cc;
+}
+
+.text-link {
+    color: var(--accent);
+    text-decoration: none;
+    transition: color 0.3s;
+}
+
+.text-link:hover {
+    color: #1eb7e6;
+}
+
+.footer {
+    background: var(--secondary);
+    padding: 2rem;
+    margin-top: auto;
+    flex-shrink: 0;
+}
+
+.footer-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2rem;
+}
+
+.footer-links {
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.footer-links a {
+    color: var(--text);
+    text-decoration: none;
+    transition: color 0.3s;
+    opacity: 0.8;
+}
+
+.footer-links a:hover {
+    color: var(--accent);
+    opacity: 1;
+}
+
+.footer-bottom {
+    text-align: center;
+    opacity: 0.6;
+    font-size: 0.9rem;
+}
+
+@media (max-width: 768px) {
+    .footer-links {
+        gap: 1rem;
+        flex-direction: column;
+        text-align: center;
+    }
+}

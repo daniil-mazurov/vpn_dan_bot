@@ -2,6 +2,7 @@
 
 import logging
 import os
+from random import randint
 
 import aiofiles
 from aiogram import Bot
@@ -11,6 +12,7 @@ from pytils.numeral import get_plural
 from core.path import PATH
 from db.models import UserData
 from db.utils import close_free_trial, get_admins
+from db.utils.redis import CashManager
 
 logger = logging.getLogger("apscheduler")
 logging.getLogger("apscheduler.executors.default").setLevel(logging.WARNING)
@@ -22,7 +24,7 @@ async def send_notice(bot: Bot):
     """Отправляет уведомления пользователям и администраторам.
 
     Эта функция читает уведомления из файла очереди и обрабатывает их.
-    В зависимости от типа уведомления (TRANSACTION или REPORT) отправляет
+    В зависимости от типа уведомления (TRANSACTION, REPORT или CODE) отправляет
     сообщения пользователю и администраторам. Также обрабатывает
     изменения статуса пробного тарифа.
 
@@ -84,6 +86,20 @@ async def send_notice(bot: Bot):
                                 admin.telegram_id,
                                 f"Поступило обращение от пользователя {user_id}. Номер обращения: {label}",
                             )
+                case "CODE":
+                    user_id = int(user_id)
+
+                    auth_code = randint(100_000, 999_999)
+
+                    await CashManager(UserData).add(
+                        {f"authcode:{user_id}": {"code": auth_code}}
+                    )
+
+                    await bot.send_message(user_id, "Ваш код для авторизации:")
+                    await bot.send_message(user_id, str(auth_code))
+
+                    logger.info("Отправлен код авторизации", extra={"user_id": user_id})
+
         except TelegramForbiddenError:
             logger.debug("Бот заблокирован пользователем. Уведомление отложено.")
         except Exception:

@@ -87,6 +87,8 @@ static_start_button = ReplyKeyboardMarkup(
         [
             KeyboardButton(text="Подключения"),
             KeyboardButton(text="Подписка"),
+        ],
+        [
             KeyboardButton(text="Помощь"),
             KeyboardButton(text="Чат"),
         ],
