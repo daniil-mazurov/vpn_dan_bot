@@ -2,6 +2,7 @@
 
 import logging
 
+from core.err import log_cash_error
 from core.exceptions import DatabaseError, WireguardError
 from db.models import FreezeSteps
 from db.utils import freeze_config, get_all_wg_configs
@@ -42,10 +43,20 @@ async def check_freeze_configs():
         if wait_yes_cfg:
             await freeze_config(wait_yes_cfg, freeze=FreezeSteps.yes)
 
-    except DatabaseError:
-        logger.exception("Ошибка связи с БД при заморозке конфигураций")
-    except WireguardError:
-        logger.exception("Ошибка связи с wireguard сервером при заморозке конфигураций")
+    except DatabaseError as e:
+        if log_cash_error(e):
+            logger.exception("Ошибка связи с БД при заморозке конфигураций")
+        return
+    except WireguardError as e:
+        if log_cash_error(e):
+            logger.exception(
+                "Ошибка связи с wireguard сервером при заморозке конфигураций"
+            )
+        return
+    except Exception as e:
+        if log_cash_error(e):
+            logger.exception("Ошибка обновления состояния заморозки")
+        return
     else:
         if wait_no_cfg:
             logger.info(
@@ -103,9 +114,17 @@ async def validate_configs():
         if to_unfreeze:
             await freeze_config(to_unfreeze, freeze=FreezeSteps.no)
 
-    except DatabaseError:
-        logger.exception("Ошибка связи с БД при заморозке конфигураций")
-    except WireguardError:
-        logger.exception("Ошибка связи с wireguard сервером при заморозке конфигураций")
-    except AssertionError:
-        logger.error("Адрес полученного пира не соответствует имеющемуся в БД")
+    except DatabaseError as e:
+        if log_cash_error(e):
+            logger.exception("Ошибка связи с БД при заморозке конфигураций")
+    except WireguardError as e:
+        if log_cash_error(e):
+            logger.exception(
+                "Ошибка связи с wireguard сервером при заморозке конфигураций"
+            )
+    except AssertionError as e:
+        if log_cash_error(e):
+            logger.error("Адрес полученного пира не соответствует имеющемуся в БД")
+    except Exception as e:
+        if log_cash_error(e):
+            logger.exception("Ошибка валидации состояния заморозки")

@@ -4,6 +4,7 @@
 *__pycache__
 *.venv
 *.env*
+*.ssh*
 *polygon.ipynb
 *polygon.py
 compile.md

@@ -8,7 +8,7 @@ from datetime import datetime, timedelta, timezone
 from aiogram import Bot
 
 from core.config import decr_time, noticed_time
-from core.exceptions import DatabaseError
+from core.err import log_cash_error
 from db.models import UserActivity
 from db.utils import get_valid_users, raise_money
 from kb import static_balance_button
@@ -66,10 +66,11 @@ async def balance_decrement():
             logger.info("Произведено ежедневное списание")
 
             increment_time(decr_time)
-    except DatabaseError:
-        logger.exception(
-            "Ошибка базы данных при осуществлении декремента баланса пользователей"
-        )
+    except Exception as e:
+        if log_cash_error(e):
+            logger.exception(
+                "Ошибка базы данных при осуществлении декремента баланса пользователей"
+            )
 
 
 async def users_notice(bot: Bot):
@@ -133,5 +134,8 @@ async def users_notice(bot: Bot):
 
             increment_time(noticed_time)
 
-    except DatabaseError:
-        logger.exception("Ошибка базы данных при отправке уведомлений пользователям")
+    except Exception as e:
+        if log_cash_error(e):
+            logger.exception(
+                "Ошибка базы данных при отправке уведомлений пользователям"
+            )

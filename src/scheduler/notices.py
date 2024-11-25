@@ -9,6 +9,7 @@ from aiogram import Bot
 from aiogram.exceptions import TelegramForbiddenError
 from pytils.numeral import get_plural
 
+from core.err import log_cash_error
 from core.path import PATH
 from db.models import UserData
 from db.utils import close_free_trial, get_admins
@@ -100,10 +101,14 @@ async def send_notice(bot: Bot):
 
                     logger.info("Отправлен код авторизации", extra={"user_id": user_id})
 
-        except TelegramForbiddenError:
-            logger.debug("Бот заблокирован пользователем. Уведомление отложено.")
-        except Exception:
-            logger.exception("Ошибка планировщика событий")
+        except TelegramForbiddenError as e:
+            if log_cash_error(e):
+                logger.debug("Бот заблокирован пользователем. Уведомление отложено.")
+            return
+        except Exception as e:
+            if log_cash_error(e):
+                logger.exception("Ошибка планировщика событий")
+            return
         else:
             notices.pop(notice.index(notice))
 

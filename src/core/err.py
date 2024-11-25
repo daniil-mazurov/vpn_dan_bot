@@ -2,6 +2,7 @@
 
 import logging
 import os
+from collections import deque
 from functools import wraps
 
 from aiogram.exceptions import AiogramError, TelegramNetworkError
@@ -10,8 +11,19 @@ from redis.asyncio.client import Pipeline
 
 from core.exceptions import DatabaseError
 
+ERRORS = deque([], maxlen=5)
+
 logger = logging.getLogger()
 rLogger = logging.getLogger("redis")
+
+
+def log_cash_error(error: Exception):
+    error_info = {"type": type(error).__name__, "message": str(error)}
+
+    if error_info not in ERRORS:
+        ERRORS.append(error_info)
+
+        return True
 
 
 def get_args_dict(fn, args, kwargs):

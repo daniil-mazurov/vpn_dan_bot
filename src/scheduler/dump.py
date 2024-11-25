@@ -5,7 +5,7 @@ from datetime import datetime
 from pathlib import Path
 
 from core.config import settings
-from core.exceptions import DumpError
+from core.err import log_cash_error
 from core.path import PATH
 from db.utils import dump
 
@@ -44,5 +44,6 @@ async def regular_dump():
             for _dump in dumps[: len(dumps) - settings.max_dumps]:
                 _dump.unlink()
 
-    except DumpError:
-        logger.exception("Ошибка создания регулярного дампа")
+    except Exception as e:
+        if log_cash_error(e):
+            logger.exception("Ошибка создания регулярного дампа")
