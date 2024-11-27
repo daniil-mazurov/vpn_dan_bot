@@ -1,0 +1,17 @@
+chmod 600 .ssh/id_rsa_wg 
+
+sudo apt-get update
+sudo apt-get install postgresql-client
+
+sudo apt -y install postgresql
+sudo service postgresql start
+
+
+sudo nano /etc/postgresql/12/main/postgresql.conf # listen_addresses = '*'
+sudo nano /etc/postgresql/12/main/pg_hba.conf # host    all             all             0.0.0.0/0               md5
+sudo service postgresql restart
+
+sudo -u postgres psql
+CREATE USER bot WITH PASSWORD 'OmegaUltraSTO500!';
+CREATE DATABASE devbotbase;
+GRANT ALL PRIVILEGES ON DATABASE devbotbase to bot;
