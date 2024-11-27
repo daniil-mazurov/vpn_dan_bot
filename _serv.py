@@ -9,8 +9,8 @@ from datetime import datetime
 
 import sentry_sdk
 import uvicorn
-from fastapi import FastAPI, Form, HTTPException
-from fastapi.responses import FileResponse, HTMLResponse
+from fastapi import FastAPI, Form, HTTPException, Response, status
+from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastui import prebuilt_html
 from fastui.auth import fastapi_auth_exception_handling
@@ -20,7 +20,9 @@ from sentry_sdk.integrations.logging import LoggingIntegration
 sys.path.insert(1, os.path.join(sys.path[0], "server"))
 sys.path.insert(1, os.path.join(sys.path[0], "src"))
 
-from server.fast_pages.auth import router as auth_router
+from server.err import RequiresLoginException
+from server.fast_pages.auth import router as admin_auth_router
+# from server.pages.auth import router as auth_router
 from server.fast_pages.form import router as form_router
 from server.fast_pages.main import router as main_router
 from server.fast_pages.reports import router as reports_router
@@ -52,9 +54,16 @@ static = StaticFiles(directory=os.path.join(PATH, "server", "static"))
 bugs = StaticFiles(directory=os.path.join(PATH, "bugs"))
 favicon_path = os.path.join(PATH, "server", "static", "favicon.ico")
 
+
+@app.exception_handler(RequiresLoginException)
+async def exception_handler(*args, **kwargs) -> Response:
+    return RedirectResponse(url="/vpn/auth", status_code=status.HTTP_302_FOUND)
+
+
 fastapi_auth_exception_handling(app)
 app.include_router(form_router, prefix="/api/bot/bug")
-app.include_router(auth_router, prefix="/api/bot/auth")
+app.include_router(admin_auth_router, prefix="/api/bot/auth")
+# app.include_router(auth_router, prefix="/vpn/auth")
 app.include_router(tables_router, prefix="/api/bot/tables")
 app.include_router(reports_router, prefix="/api/bot/tables/reports")
 app.include_router(main_router, prefix="/api/bot")

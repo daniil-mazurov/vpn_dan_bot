@@ -118,6 +118,9 @@ class Settings(BaseSettings):
     """Хеш пароля администратора."""
     JWT_SECRET: SecretStr
     """Секрет для JWT."""
+    ALGORITHM: str
+    """Алгоритм шифрования jwt токена"""
+    
 
     WG_HOST: str
     """Хост WireGuard."""

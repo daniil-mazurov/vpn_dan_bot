@@ -2,13 +2,13 @@ import logging
 import os
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, Request
-from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse
+from fastapi import APIRouter, Depends, HTTPException, Request, Response
+from fastapi.responses import FileResponse, HTMLResponse
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 from sqlalchemy import select
 
-from server.utils.auth_user import User
+from server.pages.auth import User
 from src.app import models as mod
 from src.core.path import PATH
 from src.db.database import execute_query
@@ -63,16 +63,14 @@ async def main_page(request: Request):
     )
 
 
-# @router.get("/profile", response_class=HTMLResponse)
-# async def profile_page(request: Request):
-#     return templates.TemplateResponse(
-#         "profile.html", {"request": request, "configsData": configs}
-#     )
-
-
-@router.get("/profile")
-async def redirect_to_auth():
-    return RedirectResponse(url="/vpn/auth")
+@router.get("/profile", response_class=HTMLResponse)
+async def profile_page(
+    request: Request,
+    user: Annotated[User, Depends(User.from_request)],
+):
+    return templates.TemplateResponse(
+        "profile.html", {"request": request, "configsData": configs}
+    )
 
 
 @router.get("/auth", response_class=HTMLResponse)
@@ -103,8 +101,7 @@ async def send_code(request: IDRequest):
         query = select(mod.UserData).where(mod.UserData.telegram_id == telegram_id)
         raw_tg_user: mod.UserData = (await execute_query(query)).scalar_one_or_none()
 
-        if not raw_tg_user:
-            raise Exception("Telegram ID не верный либо пользователь не доступен")
+        assert raw_tg_user
 
         logger.info(f"Sending code to Telegram ID: {telegram_id}")
 
@@ -120,13 +117,18 @@ async def send_code(request: IDRequest):
 
         return {"message": "Code sent successfully", "telegram_id": telegram_id}
 
+    except AssertionError:
+        logger.warning(
+            f"Telegram ID: {telegram_id} не верный либо пользователь не доступен"
+        )
+        raise HTTPException(status_code=500)
     except Exception as e:
         logger.exception(f"Ошибка отправки временного кода пользователя {telegram_id}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.post("/verify_code")
-async def verify_code(request: AuthRequest):
+async def verify_code(response: Response, request: AuthRequest):
     try:
         telegram_id = request.telegram_id
 
@@ -136,6 +138,10 @@ async def verify_code(request: AuthRequest):
 
         assert request.code == result[0].code
 
+        user = User(user_id=telegram_id)
+        access_token = user.auth_user()
+        response.set_cookie(key="users_access_token", value=access_token, httponly=True)
+        
         logger.info(f"Auth the user: {telegram_id} success")
 
         return {"message": "Code verify successfully", "telegram_id": telegram_id}
