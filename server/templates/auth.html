@@ -5,9 +5,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>DanVPN - Простой и быстрый VPN-сервис</title>
-  <link rel="stylesheet" href="../static/css/styles.css">
-  <link rel="stylesheet" href="../static/css/navbar.css">
-  <link rel="stylesheet" href="../static/css/auth.css">
+  <link rel="stylesheet" href="/static/css/styles.css">
+  <link rel="stylesheet" href="/static/css/navbar.css">
+  <link rel="stylesheet" href="/static/css/auth.css">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
 
 
@@ -17,14 +17,13 @@
   <nav class="navbar">
     <div class="navbar-content">
       <a href="/vpn" class="logo">
-        <img src="../static/Logo2_no_back_2.png" alt="DanVPN logo showing stylized falcon" width="60" height="60">
+        <img src="/static/Logo2_no_back_2.png" alt="DanVPN logo showing stylized falcon" width="60" height="60">
         DanVPN
       </a>
       <div class="nav-links">
-        <!-- <a href="/vpn/pricing">Pricing</a>
-        <a href="/vpn/instructions">Instructions</a> -->
+        <a href="/vpn/pricing">Тарифы</a>
+        <a href="/vpn/instructions">Инструкции</a>
         <a href="/bot/bug/create">Техподдержка</a>
-        <!-- <a href="/vpn/contact">Contact</a> -->
         <a href="/vpn/profile" class="cta-button">Войти</a>
       </div>
     </div>
@@ -76,8 +75,8 @@
     <div class="footer-content">
       <div class="footer-links">
         <a href="/vpn/about">О нас</a>
-        <a href="/vpn/docs/src.html">Разработчикам</a>
-        <a href="/vpn/privacy">Privacy Policy</a>
+        <a href="/vpn/docs/code/src.html">Разработчикам</a>
+        <a href="/vpn/docs/privacy">Privacy Policy</a>
         <a href="https://github.com/daniil-mazurov/vpn_dan_bot">GitHub</a>
       </div>
       <div class="footer-bottom">
@@ -86,7 +85,7 @@
     </div>
   </footer> -->
 
-  <script src="../static/js/navbar.js"></script>
+  <script src="/static/js/navbar.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', function () {
       const form = document.getElementById('loginForm');
@@ -106,7 +105,7 @@
 
       async function sendCodeRequest(telegramId) {
         try {
-          const response = await fetch('/vpn/send_code', {
+          const response = await fetch('/vpn/auth/send_code', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json'
@@ -127,7 +126,7 @@
 
       async function verifyCode(telegramId, code) {
         try {
-          const response = await fetch('/vpn/verify_code', {
+          const response = await fetch('/vpn/auth/verify_code', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json'

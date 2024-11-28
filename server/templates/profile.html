@@ -4,9 +4,9 @@
   <base href="." />
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Profile - FalconVPN</title>
-  <link rel="stylesheet" href="../static/css/profile.css">
-  <link rel="stylesheet" href="../static/css/navbar.css">
+  <title>DanVPN - Простой и быстрый VPN-сервис</title>
+  <link rel="stylesheet" href="/static/css/profile.css">
+  <link rel="stylesheet" href="/static/css/navbar.css">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 </head>
 
@@ -15,25 +15,24 @@
   <nav class="navbar">
     <div class="navbar-content">
       <a href="/vpn" class="logo">
-        <img src="../static/Logo2_no_back_2.png" alt="DanVPN logo showing stylized falcon" width="60" height="60">
+        <img src="/static/Logo2_no_back_2.png" alt="DanVPN logo showing stylized falcon" width="60" height="60">
         DanVPN
       </a>
       <div class="nav-links">
-        <a href="/vpn/pricing">Pricing</a>
-        <a href="/vpn/instructions">Instructions</a>
-        <a href="/vpn/support">Support</a>
-        <a href="/vpn/contact">Contact</a>
-        <a href="/vpn/profile" class="cta-button">Login</a>
+        <a href="/vpn/pricing">Тарифы</a>
+        <a href="/vpn/instructions">Инструкции</a>
+        <a href="/bot/bug/create">Техподдержка</a>
+        <a type="submit" class="cta-button cta-button-danger" id="logoutButton">Выйти</a>
       </div>
     </div>
   </nav>
 
   <div class="profile-container">
     <div class="user-header">
-      <div class="user-avatar">JD</div>
+      <div class="user-avatar">{{ avatar }}</div>
       <div class="user-info">
-        <div class="user-name">John Doe</div>
-        <div class="user-email">john.doe@example.com</div>
+        <div class="user-name">{{ user.telegram_name }}</div>
+        <div class="user-email">{{ user.telegram_id }}</div>
       </div>
     </div>
 
@@ -52,32 +51,60 @@
           <circle cx="12" cy="12" r="10"></circle>
         </svg>
       </button>
-      <div class="balance-amount">$149.99</div>
-      <div class="status-title">Current Balance</div>
+      <div class="balance-amount">₽{{ user.balance }}</div>
+      <div class="status-title">Текущий баланс</div>
     </div>
 
     <div class="status-grid">
       <div class="status-card">
-        <div class="status-title">Account Status</div>
+        <div class="status-title">WireGuard сервер</div>
         <div class="status-value">
-          <span class="status-badge badge-active">Active</span>
+          {% if "active" == server %}
+          <span class="status-badge badge-active">{{ server }}</span>
+          {% else %}
+          <span class="status-badge badge-inactive">{{ server }}</span>
+          {% endif %}
+        </div>
+      </div>
+      <div class="status-card">
+        <div class="status-title">Статус аккаунта</div>
+        <div class="status-value">
+          {% if "active" == user.active %}
+          <span class="status-badge badge-active">{{ user.active }}</span>
+          {% elif "inactive" == user.active %}
+          <span class="status-badge badge-inactive">{{ user.active }}</span>
+          {% elif "freezed" == user.active %}
+          <span class="status-badge badge-freezed">{{ user.active }}</span>
+          {% elif "banned" == user.active %}
+          <span class="status-badge badge-banned">{{ user.active }}</span>
+          {% else %}
+          <span class="status-badge badge-deleted">{{ user.active }}</span>
+          {% endif %}
         </div>
       </div>
 
       <div class="status-card">
-        <div class="status-title">Subscription Plan</div>
+        <div class="status-title">Текущий тариф</div>
         <div class="status-value">
-          <span class="status-badge badge-premium">Premium</span>
+          {% if "Люкс" == rate %}
+          <span class="status-badge badge-premium">{{ rate }}</span>
+          {% elif "Расширенный" == rate %}
+          <span class="status-badge badge-extended">{{ rate }}</span>
+          {% elif "Базовый" == rate %}
+          <span class="status-badge badge-base">{{ rate }}</span>
+          {% else %}
+          <span class="status-badge badge-none">{{ rate }}</span>
+          {% endif %}
         </div>
       </div>
 
       <div class="status-card">
-        <div class="status-title">Current Rate</div>
-        <div class="status-value">$9.99/month</div>
+        <div class="status-title">Подписка</div>
+        <div class="status-value">₽{{ rate_cost }}/день</div>
       </div>
     </div>
 
-    <h2 class="section-title">Your VPN Configurations</h2>
+    <h2 class="section-title">Ваши VPN конфигурации</h2>
     <div class="configs-grid">
       {% for config in configsData %}
       <div class="config-card">
@@ -88,15 +115,15 @@
         <div class="config-details">
           <div class="config-detail">
             <span class="detail-label">PrivateKey</span>
-            <span class="detail-value">{{ config.PrivateKey }}</span>
+            <span class="detail-value">{{ config.user_private_key }}</span>
           </div>
           <div class="config-detail">
             <span class="detail-label">Address</span>
-            <span>{{ config.Address }}</span>
+            <span>{{ config.address }}</span>
           </div>
           <div class="config-detail">
             <span class="detail-label">DNS</span>
-            <span>{{ config.DNS }}</span>
+            <span>{{ config.dns }}</span>
           </div>
           <div class="config-extra">
             <span class="extra-label">PublicKey</span>
@@ -104,11 +131,11 @@
           </div>
           <div class="config-extra">
             <span class="extra-label">AllowedIPs</span>
-            <span>{{ config.AllowedIPs }}</span>
+            <span>{{ config.allowed_ips }}</span>
           </div>
           <div class="config-extra">
             <span class="extra-label">Endpoint</span>
-            <span>{{ config.Endpoint }}</span>
+            <span>{{ config.endpoint_ip }}:{{ config.endpoint_port }}</span>
           </div>
           <div class="config-extra">
             <span class="extra-label">PersistentKeepalive</span>
@@ -208,96 +235,31 @@
   <div class="modal-overlay" id="historyModal">
     <div class="modal">
       <button class="modal-close">&times;</button>
-      <h3>Balance History</h3>
+      <h3>История операций</h3>
       <div class="history-table-container">
         <table class="history-table">
           <thead>
             <tr>
-              <th>Date</th>
-              <th>Description</th>
-              <th>Amount</th>
-              <th>Balance</th>
+              <th>Дата</th>
+              <th>Описание</th>
+              <th>Сумма</th>
             </tr>
           </thead>
           <tbody>
+            {% for transaction in transactions %}
             <tr>
-              <td>2024-01-15</td>
-              <td>Added funds</td>
-              <td class="amount-positive">+$50.00</td>
-              <td>$149.99</td>
+              <td>{{ transaction.date }}</td>
+              <td>{{ transaction.transaction_id }}</td>
+              {% if transaction.amount < 0 %}
+              <td class="amount-negative">{{ transaction.amount }}₽</td>
+              {% else %}
+              <td class="amount-positive">{{ transaction.amount }}₽</td>
+
+              {% endif %}
+
             </tr>
-            <tr>
-              <td>2024-01-10</td>
-              <td>Monthly subscription</td>
-              <td class="amount-negative">-$9.99</td>
-              <td>$99.99</td>
-            </tr>
-            <tr>
-              <td>2024-01-01</td>
-              <td>Added funds</td>
-              <td class="amount-positive">+$100.00</td>
-              <td>$109.98</td>
-            </tr>
-            <tr>
-              <td>2023-12-15</td>
-              <td>Monthly subscription</td>
-              <td class="amount-negative">-$9.99</td>
-              <td>$9.98</td>
-            </tr>
-            <tr>
-              <td>2023-12-01</td>
-              <td>Initial deposit</td>
-              <td class="amount-positive">+$19.97</td>
-              <td>$19.97</td>
-            </tr>
-            <tr>
-              <td>2023-12-01</td>
-              <td>Initial deposit</td>
-              <td class="amount-positive">+$19.97</td>
-              <td>$19.97</td>
-            </tr>
-            <tr>
-              <td>2023-12-01</td>
-              <td>Initial deposit</td>
-              <td class="amount-positive">+$19.97</td>
-              <td>$19.97</td>
-            </tr>
-            <tr>
-              <td>2023-12-01</td>
-              <td>Initial deposit</td>
-              <td class="amount-positive">+$19.97</td>
-              <td>$19.97</td>
-            </tr>
-            <tr>
-              <td>2023-12-01</td>
-              <td>Initial deposit</td>
-              <td class="amount-positive">+$19.97</td>
-              <td>$19.97</td>
-            </tr>
-            <tr>
-              <td>2023-12-01</td>
-              <td>Initial deposit</td>
-              <td class="amount-positive">+$19.97</td>
-              <td>$19.97</td>
-            </tr>
-            <tr>
-              <td>2023-12-01</td>
-              <td>Initial deposit</td>
-              <td class="amount-positive">+$19.97</td>
-              <td>$19.97</td>
-            </tr>
-            <tr>
-              <td>2023-12-01</td>
-              <td>Initial deposit</td>
-              <td class="amount-positive">+$19.97</td>
-              <td>$19.97</td>
-            </tr>
-            <tr>
-              <td>2023-12-01</td>
-              <td>Initial deposit</td>
-              <td class="amount-positive">+$19.97</td>
-              <td>$19.97</td>
-            </tr>
+            {% endfor %}
+
           </tbody>
         </table>
       </div>
@@ -305,9 +267,32 @@
   </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-  <script src="../static/js/profile.js"></script>
-  <script src="../static/js/navbar.js"></script>
+  <script src="/static/js/profile.js"></script>
+  <script src="/static/js/navbar.js"></script>
+  <script>
+    document.getElementById('logoutButton').addEventListener('click', function (event) {
+      event.preventDefault();
 
+      fetch('/vpn/auth/logout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({})
+      })
+        .then(response => {
+          if (response.ok) {
+            console.log('Вы вышли успешно');
+            window.location.href = '/vpn';
+          } else {
+            console.error('Ошибка при выходе');
+          }
+        })
+        .catch(error => {
+          console.error('Ошибка сети:', error);
+        });
+    });
+  </script>
 </body>
 
 </html>

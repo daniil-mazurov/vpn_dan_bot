@@ -158,7 +158,7 @@ body {
 
 .status-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
     gap: 1.5rem;
     margin-bottom: 2rem;
 }
@@ -185,6 +185,10 @@ body {
     animation-delay: 0.6s;
 }
 
+.status-card:nth-child(4) {
+    animation-delay: 0.8s;
+}
+
 .status-badge {
     display: inline-block;
     padding: 0.25rem 0.75rem;
@@ -199,9 +203,44 @@ body {
     color: #2ed573;
 }
 
+.badge-inactive {
+    background: rgba(188, 213, 46, 0.2);
+    color: #eeff00;
+}
+
+.badge-freezed {
+    background: rgba(46, 213, 191, 0.2);
+    color: #10e9e9;
+}
+
+.badge-deleted {
+    background: rgba(184, 189, 186, 0.2);
+    color: #9e9e9e;
+}
+
+.badge-banned {
+    background: rgba(213, 46, 46, 0.2);
+    color: #ff0000;
+}
+
 .badge-premium {
-    background: rgba(255, 185, 0, 0.2);
+    background: rgba(255, 196, 0, 0.384);
     color: #ffb900;
+}
+
+.badge-extended {
+    background: rgba(255, 185, 0, 0.2);
+    color: #ff9100;
+}
+
+.badge-base {
+    background: rgba(0, 255, 179, 0.308);
+    color: #00ffea;
+}
+
+.badge-none {
+    background: rgba(207, 206, 204, 0.2);
+    color: #e7d8ad;
 }
 
 .configs-grid {
@@ -230,6 +269,10 @@ body {
 
 .config-card:nth-child(3) {
     animation-delay: 0.9s;
+}
+
+.config-card:nth-child(4) {
+    animation-delay: 1.2s;
 }
 
 .config-card:hover {
@@ -483,8 +526,10 @@ body {
     padding: 1rem;
     border-radius: 8px;
     font-family: monospace;
-    white-space: pre-wrap;
+    white-space: pre-line;
     margin: 1rem 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .copy-button {

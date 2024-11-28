@@ -1,20 +1,32 @@
 import logging
-from dataclasses import dataclass
+import os
 from datetime import datetime, timedelta
 from typing import Dict
 
 import jwt
-from fastapi import Request
+from fastapi import APIRouter, HTTPException, Request, Response
+from fastapi.responses import HTMLResponse
+from fastapi.templating import Jinja2Templates
+from pydantic import BaseModel
+from sqlalchemy import select
 from typing_extensions import Self
 
 from core.config import settings
 from server.err import RequiresLoginException
+from src.app import models as mod
+from src.core.path import PATH
+from src.db.database import execute_query
+from src.db.utils.redis import CashManager
 
+router = APIRouter()
 logger = logging.getLogger()
+queue = logging.getLogger("queue")
+
+templates = Jinja2Templates(directory=os.path.join(PATH, "server", "templates"))
 
 
-@dataclass
-class User:
+# @dataclass
+class User(BaseModel):
     user_id: int
 
     def auth_user(self) -> Dict[str, str]:
@@ -28,6 +40,20 @@ class User:
         return token
 
     @classmethod
+    def decodeJWT(cls, token: str) -> dict:
+        decoded_token = jwt.decode(
+            token,
+            settings.JWT_SECRET.get_secret_value(),
+            algorithms=[settings.ALGORITHM],
+        )
+
+        return (
+            decoded_token
+            if datetime.fromtimestamp(decoded_token["exp"]) > datetime.now()
+            else None
+        )
+
+    @classmethod
     def from_request(cls, request: Request) -> Self:
         user = cls.from_request_opt(request)
         if user is None:
@@ -39,7 +65,7 @@ class User:
     def from_request_opt(cls, request: Request) -> Self | None:
         try:
             token = request.cookies.get("users_access_token")
-            payload = decodeJWT(token)
+            payload = cls.decodeJWT(token)
 
         except (jwt.DecodeError, jwt.ExpiredSignatureError):
             return None
@@ -50,56 +76,90 @@ class User:
             return cls(**payload)
 
 
-def decodeJWT(token: str) -> dict:
-    decoded_token = jwt.decode(
-        token,
-        settings.JWT_SECRET.get_secret_value(),
-        algorithms=[settings.ALGORITHM],
-    )
-
-    return (
-        decoded_token
-        if datetime.fromtimestamp(decoded_token["exp"]) > datetime.now()
-        else None
-    )
+@router.get("/login", response_class=HTMLResponse)
+async def auth_page(request: Request):
+    return templates.TemplateResponse("auth.html", {"request": request})
 
 
-# class JWTBearer(HTTPBearer):
-#     def __init__(self, auto_error: bool = True):
-#         super(JWTBearer, self).__init__(auto_error=auto_error)
+@router.post("/logout")
+async def logout(response: Response):
+    response.delete_cookie(key="users_access_token")
+    return {"message": "Пользователь успешно вышел из системы"}
 
-#     def __call__(self, request: Request):
-#         credentials = HTTPAuthorizationCredentials(
-#             scheme="Bearer", credentials=request.cookies.get("users_access_token")
-#         )
-#         if credentials:
-#             if not credentials.scheme == "Bearer":
-#                 raise HTTPException(
-#                     status_code=status.HTTP_403_FORBIDDEN,
-#                     detail="Invalid authentication scheme.",
-#                     headers={"WWW-Authenticate": "Bearer"},
-#                 )
 
-#             payload = self.get_payload(credentials.credentials)
-#             if not payload:
-#                 raise HTTPException(
-#                     status_code=status.HTTP_401_UNAUTHORIZED,
-#                     detail="Token expired",
-#                     headers={"WWW-Authenticate": "Bearer"},
-#                 )
-#             return payload
-#         else:
-#             raise HTTPException(
-#                 status_code=status.HTTP_403_FORBIDDEN,
-#                 detail="Invalid authorization code.",
-#                 headers={"WWW-Authenticate": "Bearer"},
-#             )
+class IDRequest(BaseModel):
+    __tablename__ = "userdata"
 
-#     def get_payload(self, jwtoken: str) -> bool:
-#         payload = None
-#         try:
-#             payload = decodeJWT(jwtoken)
-#         except Exception:
-#             pass
-#         else:
-#             return payload
+    telegram_id: int
+
+
+class CodeRequest(BaseModel):
+    __tablename__ = "userdata"
+
+    code: int
+
+
+class AuthRequest(IDRequest, CodeRequest): ...
+
+
+@router.post("/send_code")
+async def send_code(request: IDRequest):
+    try:
+        telegram_id = request.telegram_id
+
+        query = select(mod.UserData).where(mod.UserData.telegram_id == telegram_id)
+        raw_tg_user: mod.UserData = (await execute_query(query)).scalar_one_or_none()
+
+        assert raw_tg_user
+
+        logger.info(f"Sending code to Telegram ID: {telegram_id}")
+
+        queue.info(
+            "Отправка кода для авторизации",
+            extra={
+                "type": "CODE",
+                "user_id": request.telegram_id,
+                "label": None,
+                "amount": None,
+            },
+        )
+
+        return {"message": "Code sent successfully", "telegram_id": telegram_id}
+
+    except AssertionError:
+        logger.warning(
+            f"Telegram ID: {telegram_id} не верный либо пользователь не доступен"
+        )
+        raise HTTPException(status_code=500)
+    except Exception as e:
+        logger.exception(f"Ошибка отправки временного кода пользователя {telegram_id}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/verify_code")
+async def verify_code(response: Response, request: AuthRequest):
+    try:
+        telegram_id = request.telegram_id
+
+        result: list[CodeRequest] = await CashManager(CodeRequest).get(
+            {f"authcode:{telegram_id}": ...}
+        )
+
+        assert request.code == result[0].code
+
+        user = User(user_id=telegram_id)
+        access_token = user.auth_user()
+        response.set_cookie(key="users_access_token", value=access_token, httponly=True)
+
+        logger.info(f"Auth the user: {telegram_id} success")
+
+        return {"message": "Code verify successfully", "telegram_id": telegram_id}
+
+    except AssertionError:
+        logger.warning(f"Неправильно введен код пользователем: {telegram_id}")
+        raise HTTPException(status_code=500)
+    except Exception as e:
+        logger.exception(
+            f"Ошибка верификации временного кода пользователя {telegram_id}"
+        )
+        raise HTTPException(status_code=500, detail=str(e))

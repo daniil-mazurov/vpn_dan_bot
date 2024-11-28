@@ -111,6 +111,22 @@ body {
     animation: buttonShine 3s infinite;
 }
 
+.cta-button-danger {
+    background: #cc0000;
+    color: var(--text);
+}
+
+.cta-button-danger:hover {
+    box-shadow: 0 5px 15px rgba(255, 102, 102, 0.4);
+}
+
+.cta-button-danger::after {
+    background: linear-gradient(45deg,
+            transparent 0%,
+            rgba(255, 255, 255, 0.1) 50%,
+            transparent 100%);
+}
+
 @keyframes buttonShine {
     0% {
         transform: translateX(-100%) rotate(45deg);

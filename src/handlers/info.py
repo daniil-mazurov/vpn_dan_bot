@@ -228,8 +228,9 @@ async def start_bot(trigger: Union[Message, CallbackQuery]):
 
     Отправляет сообщение с Telegram ID пользователя.
     """
-    await getattr(trigger, "message", trigger).answer("Ваш Telegram ID")
-    await getattr(trigger, "message", trigger).answer(str(trigger.from_user.id))
+    await getattr(trigger, "message", trigger).answer(
+        f'Ваш Telegram ID\n\n<span class="tg-spoiler">{trigger.from_user.id}</span>'
+    )
 
 
 @router.message(Command("cmd"))

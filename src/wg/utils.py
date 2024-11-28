@@ -126,7 +126,11 @@ class WgServerTools:
         Raises:
             WireguardError: Если не удалось установить соединение.
         """
-        conn = SSH.connection
+        try:
+            conn = SSH.connection
+        except AttributeError:
+            await SSH.connect()
+            conn = SSH.connection
 
         if conn.is_closed():
             await SSH.connect()

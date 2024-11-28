@@ -96,8 +96,10 @@ async def send_notice(bot: Bot):
                         {f"authcode:{user_id}": {"code": auth_code}}
                     )
 
-                    await bot.send_message(user_id, "Ваш код для авторизации:")
-                    await bot.send_message(user_id, str(auth_code))
+                    await bot.send_message(
+                        user_id,
+                        f'Ваш код для авторизации\n\n<span class="tg-spoiler">{auth_code}</span>',
+                    )
 
                     logger.info("Отправлен код авторизации", extra={"user_id": user_id})
 

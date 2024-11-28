@@ -5,8 +5,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>DanVPN - Простой и быстрый VPN-сервис</title>
-  <link rel="stylesheet" href="../static/css/styles.css">
-  <link rel="stylesheet" href="../static/css/navbar.css">
+  <link rel="stylesheet" href="/static/css/styles.css">
+  <link rel="stylesheet" href="/static/css/navbar.css">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
 </head>
 
@@ -15,25 +15,22 @@
   <nav class="navbar">
     <div class="navbar-content">
       <a href="/vpn" class="logo">
-        <img src="../static/Logo2_no_back_2.png" alt="DanVPN logo showing stylized falcon" width="60" height="60">
+        <img src="/static/Logo2_no_back_2.png" alt="DanVPN logo showing stylized falcon" width="60" height="60">
         DanVPN
       </a>
       <div class="nav-links">
-        <!-- <a href="/vpn/pricing">Pricing</a>
-        <a href="/vpn/instructions">Instructions</a> -->
+        <a href="/vpn/pricing">Тарифы</a>
+        <a href="/vpn/instructions">Инструкции</a>
         <a href="/bot/bug/create">Техподдержка</a>
-        <!-- <a href="/vpn/contact">Contact</a> -->
-        <a href="/vpn/profile" class="cta-button">Войти</a>
+        <a href="/vpn/profile" class="cta-button">{{ name }}</a>
       </div>
     </div>
   </nav>
 
   <section class="hero">
-    <img src="../static/Logo2_no_back_2.png" alt="DanVPN logo showing stylized falcon" width="180" height="180"
+    <img src="/static/Logo2_no_back_2.png" alt="DanVPN logo showing stylized falcon" width="180" height="180"
       style="margin-bottom: 2rem;">
     <h1>Открой новую высоту с DanVPN</h1>
-    <!-- <p>Lightning-fast speeds, military-grade encryption, and unlimited bandwidth. Take control of your online privacy
-      today.</p> -->
     <p>Добро пожаловать в наш VPN-сервис на базе WireGuard</p>
     <a href="https://t.me/vpn_dan_bot" class="cta-button">Полетели!</a>
   </section>
@@ -117,8 +114,8 @@
     <div class="footer-content">
       <div class="footer-links">
         <a href="/vpn/about">О нас</a>
-        <a href="/vpn/docs/src.html">Разработчикам</a>
-        <a href="/vpn/privacy">Privacy Policy</a>
+        <a href="/vpn/docs/code/src.html">Разработчикам</a>
+        <a href="/vpn/docs/privacy">Privacy Policy</a>
         <a href="https://github.com/daniil-mazurov/vpn_dan_bot">GitHub</a>
       </div>
       <div class="footer-bottom">
@@ -131,8 +128,8 @@
     // Инициализация переменной newsContent с данными из FastAPI
     const newsContent = {{ news_content | safe }};
   </script>
-  <script src="../static/js/index.js"></script>
-  <script src="../static/js/navbar.js"></script>
+  <script src="/static/js/index.js"></script>
+  <script src="/static/js/navbar.js"></script>
 
 </body>
 

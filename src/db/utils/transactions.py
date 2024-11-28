@@ -4,7 +4,7 @@ import logging
 from datetime import datetime, timezone
 from uuid import uuid4
 
-from sqlalchemy import and_, insert, select, update
+from sqlalchemy import and_, desc, insert, select, update
 
 from core.config import settings
 from core.metric import async_speed_metric
@@ -167,9 +167,13 @@ async def get_user_transactions(user_id):
     trans: list[Transactions] = await get_cash_wg_transactions(user_id)
 
     if trans:
-        return trans
+        return sorted(trans, key=lambda x: x.date, reverse=True)
 
-    query = select(Transactions).where(Transactions.user_id == user_id)
+    query = (
+        select(Transactions)
+        .where(Transactions.user_id == user_id)
+        .order_by(desc(Transactions.date))
+    )
 
     result: list[Transactions] = (await execute_query(query)).scalars().all()
 
