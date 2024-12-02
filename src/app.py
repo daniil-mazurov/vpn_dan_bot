@@ -205,7 +205,7 @@ async def test_subserver():
         AssertionError: Если ответ от подсервера не соответствует ожиданиям.
     """
     async with ClientSession() as session:
-        url = "http://assa.ddns.net/test"
+        url = f"{settings.subserver_url}/test"
         # url = "http://127.0.0.1:5000/test"
         params = {"name": "test"}
 
@@ -217,7 +217,7 @@ async def test_subserver():
 async def start_bot():
     """Запускает бота и его службы.
 
-    Эта функция инициализирует подключение по SSH к wireguard серверу, 
+    Эта функция инициализирует подключение по SSH к wireguard серверу,
     создает бота, диспетчер и планировщик, а затем запускает все службы.
 
     Returns:

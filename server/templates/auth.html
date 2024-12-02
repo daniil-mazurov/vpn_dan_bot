@@ -31,9 +31,9 @@
 
 
   <div class="auth-container">
-    <h2 style="text-align: center; margin-bottom: 2rem;">Login to FalconVPN</h2>
+    <h2 style="text-align: center; margin-bottom: 2rem;">Login to DanVPN</h2>
 
-    <div class="step-indicator">Step 1 of 2</div>
+    <div class="step-indicator">Шаг 1 из 2</div>
 
     <form class="auth-form" id="loginForm">
       <div class="form-group">
@@ -45,23 +45,24 @@
           Telegram ID
         </label>
         <input type="text" id="telegram_id" required placeholder="Enter your Telegram ID">
-        <p class="help-text">Please ensure you're logged into Telegram to receive the verification code</p>
-        <p class="error-message" id="telegramIdError">Please enter a valid Telegram ID</p>
+        <p class="help-text">Пожалуйста, убедитесь, что вы зарегистрированы в Telegram боте сервиса, чтобы получить код
+        </p>
+        <p class="error-message" id="telegramIdError">Пожалуйста введите правильный Telegram ID</p>
       </div>
 
       <div class="verification-section" id="verificationSection">
         <div class="form-group">
-          <label for="verification_code">Verification Code</label>
-          <input type="text" id="verification_code" maxlength="6" placeholder="Enter 6-digit code" pattern="[0-9]{6}">
-          <p class="error-message" id="verificationCodeError">Please enter a valid 6-digit code</p>
+          <label for="verification_code">Проверочный код</label>
+          <input type="text" id="verification_code" maxlength="6" placeholder="Введите 6-значный код" pattern="[0-9]{6}">
+          <p class="error-message" id="verificationCodeError">Пожалуйста введите правильный шестизначный код</p>
         </div>
         <div class="verification-buttons">
-          <button type="button" class="cta-button" id="confirmButton">Confirm Code</button>
-          <button type="button" class="cta-button" id="resendButton">Resend Code</button>
+          <button type="button" class="cta-button" id="confirmButton">Подтвердить</button>
+          <button type="button" class="cta-button" id="resendButton">Отправить код еще раз</button>
         </div>
       </div>
 
-      <button type="submit" class="cta-button" id="submitButton">Request Code</button>
+      <button type="submit" class="cta-button" id="submitButton">Получить код</button>
     </form>
   </div>
 
@@ -193,12 +194,12 @@
               isVerificationStep = true;
               verificationSection.classList.add('active');
               submitButton.style.display = 'none';
-              stepIndicator.textContent = 'Step 2 of 2';
+              stepIndicator.textContent = 'Шаг 2 из 2';
               telegramInput.disabled = true;
               startCountdown(resendButton);
             } else {
               showError(telegramInput, telegramIdError);
-              telegramIdError.textContent = 'Failed to send verification code. Please try again.';
+              telegramIdError.textContent = 'Ошибка отправки проверочного кода. Проверьте Telegram ID и попробуйте снова.';
             }
           } else {
             showError(telegramInput, telegramIdError);
@@ -212,7 +213,7 @@
           if (sendResult) {
             startCountdown(resendButton);
           } else {
-            verificationCodeError.textContent = 'Failed to resend code. Please try again.';
+            verificationCodeError.textContent = 'Ошибка отправки проверочного кода. Пожалуйста попробуйте позже.';
             verificationCodeError.classList.add('show');
           }
         }
@@ -223,10 +224,10 @@
           hideError(verificationCode, verificationCodeError);
           const verifyResult = await verifyCode(telegramInput.value, verificationCode.value);
           if (verifyResult) {
-            window.location.href = '/vpn/profile';
+            window.location.href = '/vpn/auth/redirect?redirected={{ redirected }}';
           } else {
             showError(verificationCode, verificationCodeError);
-            verificationCodeError.textContent = 'Invalid verification code. Please try again.';
+            verificationCodeError.textContent = 'Неверный проверочный код. Попробуйте снова.';
           }
         } else {
           showError(verificationCode, verificationCodeError);

@@ -9,7 +9,7 @@ from datetime import datetime
 
 import sentry_sdk
 import uvicorn
-from fastapi import FastAPI, Form, HTTPException, Response, status
+from fastapi import FastAPI, Form, HTTPException, Request, Response, status
 from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastui import prebuilt_html
@@ -30,6 +30,7 @@ from server.fast_pages.tables import router as tables_router
 from server.pages.auth import router as auth_router
 from server.pages.docs import router as docs_router
 from server.pages.index import router as index_router
+from server.pages.pricing import router as pricing_router
 from server.pages.profile import router as profile_router
 from src.app import models as mod
 from src.core.path import PATH
@@ -59,8 +60,15 @@ favicon_path = os.path.join(PATH, "server", "static", "favicon.ico")
 
 
 @app.exception_handler(RequiresLoginException)
-async def exception_handler(*args, **kwargs) -> Response:
-    return RedirectResponse(url="/vpn/auth/login", status_code=status.HTTP_302_FOUND)
+async def exception_handler(request: Request, exception: Exception, *args) -> Response:
+    if request.method == "POST":
+        r_url = f"/vpn/auth/login?redirected={request.headers.get('referer')}"
+    else:
+        r_url = f"/vpn/auth/login?redirected={request.url.path}"
+
+    return RedirectResponse(
+        url=r_url, status_code=status.HTTP_302_FOUND, headers={"Location": r_url}
+    )
 
 
 fastapi_auth_exception_handling(app)
@@ -71,6 +79,7 @@ app.include_router(reports_router, prefix="/api/bot/tables/reports")
 app.include_router(main_router, prefix="/api/bot")
 app.include_router(docs_router, prefix="/vpn/docs")
 app.include_router(auth_router, prefix="/vpn/auth")
+app.include_router(pricing_router, prefix="/vpn/pricing")
 app.include_router(profile_router, prefix="/vpn/profile")
 app.include_router(index_router, prefix="/vpn")
 app.mount("/static", static, name="static")
@@ -153,8 +162,16 @@ async def html_landing() -> HTMLResponse:
 
 
 if __name__ == "__main__":
-    # with open("./logs/server.log", "w"), open("./logs/psql_serv.log", "w"):
-    #     ...
+    logger.info("\n" * 5 + "#" * 20)
+
+    for extra_logger in {logger.split(".")[0] for logger in logger.manager.loggerDict}:
+        if extra_logger == "queue":
+            continue
+
+        logging.getLogger(extra_logger).info(
+            f"<{'=' * 10} {extra_logger.upper()} START {'='*10}>"
+        )
+
     uvicorn.run(
         "_serv:app",
         # host="127.0.0.1",

@@ -4,6 +4,7 @@ from aiogram.types import (InlineKeyboardButton, InlineKeyboardMarkup,
                            KeyboardButton, ReplyKeyboardMarkup)
 from pytils.numeral import get_plural
 
+from core.config import settings
 from db.models import UserActivity, UserData
 from text import rates
 
@@ -200,7 +201,7 @@ def get_help_menu(name, user_id):
             [
                 InlineKeyboardButton(
                     text="Задать свой вопрос",
-                    url=f"http://assa.ddns.net/bot/bug/create?name={name}&telegram_id={user_id}",
+                    url=f"{settings.subserver_url}/bot/bug/create?name={name}&telegram_id={user_id}",
                 )
             ],
         ]
@@ -294,7 +295,7 @@ def get_account_keyboard(user_data: UserData, extended=False):
                 [
                     InlineKeyboardButton(
                         text="Подать заявку на разбан",
-                        url=f"http://assa.ddns.net/bot/bug/create?name={user_data.telegram_name}&telegram_id={user_data.telegram_id}",
+                        url=f"{settings.subserver_url}/bot/bug/create?name={user_data.telegram_name}&telegram_id={user_data.telegram_id}",
                     )
                 ]
             )
@@ -505,7 +506,7 @@ def get_bug_report_url(name, user_id):
             [
                 InlineKeyboardButton(
                     text="Заполнить форму обращения",
-                    url=f"http://assa.ddns.net/bot/bug/create?name={name}&telegram_id={user_id}",
+                    url=f"{settings.subserver_url}/bot/bug/create?name={name}&telegram_id={user_id}",
                 )
             ]
         ]

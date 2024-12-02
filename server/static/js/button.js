@@ -10,7 +10,8 @@ document.getElementById('logoutButton').addEventListener('click', function (even
         body: JSON.stringify({}) // добавьте данные, если нужно
     })
         .then(response => {
-            if (response.ok) {
+            // if (response.ok) {
+            if (response.status === 200) {
                 // Обработка успешного ответа
                 console.log('Вы вышли успешно');
                 // Например, перенаправление на главную страницу

@@ -50,9 +50,9 @@ async def main_page(
     )
 
 
-# @router.get("/pricing", response_class=HTMLResponse)
-# async def pricing_page(request: Request):
-#     return templates.TemplateResponse("pricing.html", {"request": request})
+@router.get("/500", response_class=HTMLResponse)
+async def internal_error(request: Request):
+    return templates.TemplateResponse("500.html", {"request": request})
 
 
 @router.get("/{path:path}", response_class=HTMLResponse)

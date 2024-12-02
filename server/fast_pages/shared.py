@@ -8,6 +8,7 @@ from fastui import AnyComponent
 from fastui import components as c
 from fastui.events import GoToEvent
 
+from core.config import settings
 from db import models as mod
 from server.utils.auth_user import User
 
@@ -49,7 +50,7 @@ def bot_page(
         c.PageTitle(text=f"Dan VPN — {title}" if title else "Dan VPN"),
         c.Navbar(
             title="Dan VPN",
-            title_event=GoToEvent(url="http://assa.ddns.net/vpn"),
+            title_event=GoToEvent(url=f"{settings.subserver_url}/vpn"),
             start_links=[
                 *authorised,
                 c.Link(

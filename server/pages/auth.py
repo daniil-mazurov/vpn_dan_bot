@@ -4,8 +4,8 @@ from datetime import datetime, timedelta
 from typing import Dict
 
 import jwt
-from fastapi import APIRouter, HTTPException, Request, Response
-from fastapi.responses import HTMLResponse
+from fastapi import APIRouter, HTTPException, Request, Response, status
+from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 from sqlalchemy import select
@@ -77,8 +77,18 @@ class User(BaseModel):
 
 
 @router.get("/login", response_class=HTMLResponse)
-async def auth_page(request: Request):
-    return templates.TemplateResponse("auth.html", {"request": request})
+async def auth_page(request: Request, redirected: str):
+    return templates.TemplateResponse(
+        "auth.html",
+        {"request": request, "redirected": redirected},
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        headers={"Location": f"/vpn/auth/login?redirected={redirected}"},
+    )
+
+
+@router.get("/redirect", response_class=HTMLResponse)
+async def auth_success(redirected: str):
+    return RedirectResponse(url=redirected)
 
 
 @router.post("/logout")
