@@ -693,3 +693,175 @@ body {
 .amount-negative {
     color: #ff4757;
 }
+
+.notifications-panel {
+    position: fixed;
+    top: 100px;
+    right: 20px;
+    width: 300px;
+    background: var(--primary);
+    border-radius: 15px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 1rem;
+    z-index: 900;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    max-height: 70vh;
+    overflow-y: auto;
+    animation: slideInRight 0.3s ease-out;
+    transition: transform 0.3s ease;
+}
+
+.notifications-title {
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.notification-count {
+    background: var(--accent);
+    color: var(--text);
+    padding: 0.2rem 0.5rem;
+    border-radius: 12px;
+    font-size: 0.8rem;
+}
+
+.notification-item {
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    margin-bottom: 0.8rem;
+    position: relative;
+    transition: all 0.3s ease;
+    animation: fadeIn 0.5s ease-out;
+}
+
+.notification-item:hover {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.notification-item.unread::before {
+    content: '';
+    position: absolute;
+    top: 1rem;
+    left: -0.25rem;
+    width: 6px;
+    height: 6px;
+    background: var(--accent);
+    border-radius: 50%;
+}
+
+.notification-item.success {
+    border-left: 3px solid #2ed573;
+}
+
+.notification-item.error {
+    border-left: 3px solid #e40b0b;
+}
+
+.notification-item.warning {
+    border-left: 3px solid #ffa502;
+}
+
+.notification-item.info {
+    border-left: 3px solid #1e90ff;
+}
+
+.notification-time {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.5);
+    margin-top: 0.5rem;
+}
+
+.notification-message {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+.notification-close {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.5);
+    cursor: pointer;
+    padding: 0.2rem;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.notification-close:hover {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Add new CSS */
+.notifications-toggle {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: var(--accent);
+    border: none;
+    color: var(--text);
+    cursor: pointer;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    z-index: 899;
+    transition: all 0.3s ease;
+}
+
+.notifications-toggle:hover {
+    transform: scale(1.1);
+}
+
+.notifications-toggle svg {
+    width: 24px;
+    height: 24px;
+}
+
+/* Update notifications panel CSS */
+.notifications-panel {
+    transition: transform 0.3s ease;
+}
+
+/* Add media query for mobile */
+@media (max-width: 146800px) {
+    .notifications-toggle {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .notifications-panel {
+        transform: translateX(0);
+        /*
+        top: 0;
+        */
+        right: 0;
+        /*
+        bottom: 0;
+        width: 100%;
+        max-width: 300px;
+        margin: 0;
+        border-radius: 0;*/
+    }
+
+    .notifications-panel.visible {
+        transform: translateX(100%);
+    }
+}

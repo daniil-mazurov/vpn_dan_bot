@@ -43,6 +43,29 @@ async def get_user(user_id):
 
 
 @async_speed_metric
+async def get_all_userdata(user_id):
+    """Получает все данные пользователя (конфигурации, транзакции, отчеты, уведомления) по идентификатору.
+
+    Функция сначала пытается получить данные пользователя из кеша.
+    Если данных нет, выполняется выборка из базы данных.
+
+    Args:
+        user_id (str): Идентификатор пользователя.
+
+    Returns:
+        UserData(BaseModel): Объект данных пользователя или None, если пользователь не найден.
+    """
+    query = select(UserData).where(UserData.telegram_id == user_id)
+    user: UserData = (await execute_query(query)).scalar_one_or_none()
+    if user:
+        all_userdata = UserData.ValidationSchemaExtended.model_validate(
+            user, from_attributes=True
+        )
+        return all_userdata
+    return user
+
+
+@async_speed_metric
 async def add_user(user_id, user_name):
     """Добавляет нового пользователя в базу данных.
 

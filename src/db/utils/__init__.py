@@ -26,7 +26,7 @@
     - delete_cash_transactions: Удаляет кэшированные транзакции.
     - get_user_transactions: Получает транзакции пользователя.
     - insert_transaction: Вставляет транзакцию.
-    - raise_money: Cписывает деньги.
+    - raise_money: Списывает деньги.
 
 - Пользователи:
     - add_user: Добавляет нового пользователя.
@@ -34,10 +34,15 @@
     - clear_cash: Очищает кэш пользователя.
     - freeze_user: Замораживает пользователя.
     - get_user: Получает данные пользователя.
+    - get_all_userdata: Получает все смежные данные пользователя.
     - mute_user: Отключает уведомления пользователя.
     - recover_user: Восстанавливает пользователя.
     - update_rate_user: Обновляет тариф пользователя.
 
+- Пользовательские уведомления:
+    - get_notifications: Получить уведомления пользователя
+    - add_notification: Добавить уведомление
+    
 - Конфигурации WireGuard:
     - add_wg_config: Добавляет конфигурацию WireGuard.
     - freeze_config: Замораживает конфигурацию WireGuard.
@@ -49,6 +54,7 @@
 from db.utils.admin import (get_admins, get_all_users, get_valid_users,
                             set_admin)
 from db.utils.news import add_news
+from db.utils.notifications import add_notification, get_notifications
 from db.utils.reports import add_report
 from db.utils.save import async_backup, dump
 from db.utils.tests import test_server_speed
@@ -57,6 +63,7 @@ from db.utils.transactions import (close_free_trial, confirm_success_pay,
                                    get_user_transactions, insert_transaction,
                                    raise_money)
 from db.utils.user import (add_user, ban_user, clear_cash, freeze_user,
-                           get_user, mute_user, recover_user, update_rate_user)
+                           get_all_userdata, get_user, mute_user, recover_user,
+                           update_rate_user)
 from db.utils.wg import (add_wg_config, freeze_config, get_all_wg_configs,
                          get_user_with_configs, get_wg_config)

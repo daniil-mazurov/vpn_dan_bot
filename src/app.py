@@ -205,7 +205,7 @@ async def test_subserver():
         AssertionError: Если ответ от подсервера не соответствует ожиданиям.
     """
     async with ClientSession() as session:
-        url = f"{settings.subserver_url}/test"
+        url = f"{settings.subserver_url}test"
         # url = "http://127.0.0.1:5000/test"
         params = {"name": "test"}
 

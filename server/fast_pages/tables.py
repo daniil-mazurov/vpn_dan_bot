@@ -14,6 +14,7 @@ from core.config import settings
 from core.err import DatabaseError
 from db import models as mod
 from db.database import execute_query
+from db.utils import get_all_userdata
 from server.fast_pages.shared import bot_page, tabs
 from server.utils.auth_user import User
 
@@ -139,7 +140,7 @@ async def userdata_view(
 
 class TransactionType(str, enum.Enum):
     """Тип операции"""
-    
+
     inner = "Пополнение"
     outer = "Списание"
     success = "Исполнена"
@@ -363,27 +364,8 @@ async def user_profile(
         _table = mod.UserData
         size = user.page_size
 
-        query = select(_table).where(_table.telegram_id == telegram_id)
-        raw_tg_user: mod.UserData = (await execute_query(query)).scalar_one_or_none()
-        if raw_tg_user:
-            tg_user = _table.ValidationSchema.model_validate(
-                raw_tg_user, from_attributes=True
-            )
-
-            query = (
-                select(mod.Transactions)
-                .where(mod.Transactions.user_id == tg_user.telegram_id)
-                .order_by(desc(mod.Transactions.date))
-            )
-            raw: list = (await execute_query(query)).scalars().all()
-            transactions = [
-                mod.Transactions.ValidationSchema.model_validate(
-                    row, from_attributes=True
-                )
-                for row in raw
-            ]
-
-        else:
+        tg_user = await get_all_userdata(telegram_id)
+        if not tg_user:
             return bot_page(c.Paragraph(text="User not found"), user=user)
 
     except DatabaseError:
@@ -405,18 +387,18 @@ async def user_profile(
         else:
             wg_configs = (c.Paragraph(text="No configs"),)
 
-        if transactions:
+        if tg_user.transactions:
             user_tr = (
                 c.Table(
-                    data=transactions[
-                        (transact_page - 1) * size : transact_page * size
-                    ],
+                    data=sorted(
+                        tg_user.transactions, key=lambda x: x.date, reverse=True
+                    )[(transact_page - 1) * size : transact_page * size],
                     columns=mod.Transactions.site_display,
                 ),
                 c.Pagination(
                     page=transact_page,
                     page_size=size,
-                    total=len(transactions),
+                    total=len(tg_user.transactions),
                     page_query_param="transact_page",
                 ),
             )

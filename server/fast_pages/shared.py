@@ -50,7 +50,7 @@ def bot_page(
         c.PageTitle(text=f"Dan VPN — {title}" if title else "Dan VPN"),
         c.Navbar(
             title="Dan VPN",
-            title_event=GoToEvent(url=f"{settings.subserver_url}/vpn"),
+            title_event=GoToEvent(url=f"{settings.subserver_url}vpn"),
             start_links=[
                 *authorised,
                 c.Link(

@@ -39,7 +39,7 @@
     <div class="action-buttons">
       <button class="action-button freeze">Freeze Account</button>
       <button class="action-button new-config">New Configuration</button>
-      <button class="action-button change-plan">Change Plan</button>
+      <button class="action-button change-plan" id="changePlanButton">Change Plan</button>
       <button class="action-button add-funds">Add Funds</button>
     </div>
 
@@ -250,12 +250,11 @@
             <tr>
               <td>{{ transaction.date }}</td>
               <td>{{ transaction.transaction_id }}</td>
-              {% if transaction.amount < 0 %}
-              <td class="amount-negative">{{ transaction.amount }}₽</td>
-              {% else %}
-              <td class="amount-positive">{{ transaction.amount }}₽</td>
+              {% if transaction.amount < 0 %} <td class="amount-negative">{{ transaction.amount }}₽</td>
+                {% else %}
+                <td class="amount-positive">{{ transaction.amount }}₽</td>
 
-              {% endif %}
+                {% endif %}
 
             </tr>
             {% endfor %}
@@ -266,9 +265,58 @@
     </div>
   </div>
 
+  <div class="notifications-panel">
+    <div class="notifications-header">
+      <div class="notifications-title">
+        Notifications
+        <span class="notification-count">{{ notifications.len }}</span>
+      </div>
+    </div>
+    {% for notification in notifications.data %}
+    <div class="notification-item {{ notification.type }}">
+      <button class="notification-close">&times;</button>
+      <div class="notification-message">
+        {{ notification.message }}
+      </div>
+      <div class="notification-time">{{ notification.date }}</div>
+    </div>
+    {% endfor %}
+
+
+    <!-- <div class="notification-item unread warning">
+      <button class="notification-close">&times;</button>
+      <div class="notification-message">
+        Your subscription will expire in 3 days. Please renew to avoid service interruption.
+      </div>
+      <div class="notification-time">1 hour ago</div>
+    </div>
+
+    <div class="notification-item info">
+      <button class="notification-close">&times;</button>
+      <div class="notification-message">
+        New server location available in Singapore. Try it now!
+      </div>
+      <div class="notification-time">1 day ago</div>
+    </div> -->
+  </div>
+
+  <!-- Notifications Toggle Button -->
+  <button class="notifications-toggle">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+      stroke-linejoin="round">
+      <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+      <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+    </svg>
+  </button>
+
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <script src="/static/js/profile.js"></script>
   <script src="/static/js/navbar.js"></script>
+  <script>
+    document.getElementById('changePlanButton').addEventListener('click', function () {
+      window.location.href = "/vpn/pricing";
+    });
+  </script>
   <script>
     document.getElementById('logoutButton').addEventListener('click', function (event) {
       event.preventDefault();
@@ -281,7 +329,7 @@
         body: JSON.stringify({})
       })
         .then(response => {
-          if (response.ok) {
+          if (response.status === 200) {
             console.log('Вы вышли успешно');
             window.location.href = '/vpn';
           } else {

@@ -81,6 +81,53 @@ document.addEventListener('DOMContentLoaded', function () {
         historyModal.style.display = 'flex';
     });
 
+    // Add notification handling
+    document.querySelectorAll('.notification-close').forEach(button => {
+        button.addEventListener('click', (e) => {
+            const notification = e.target.closest('.notification-item');
+            notification.style.animation = 'fadeOut 0.3s ease-out';
+            setTimeout(() => {
+                notification.remove();
+                updateNotificationCount();
+            }, 300);
+            e.stopPropagation();
+        });
+    });
+
+    // Add notification toggle button to the DOM
+    const toggleButton = document.querySelector('.notifications-toggle');
+    const notificationsPanel = document.querySelector('.notifications-panel');
+
+    toggleButton.addEventListener('click', () => {
+        notificationsPanel.classList.toggle('visible');
+    });
+
+    // Close notifications when clicking outside on mobile
+    document.addEventListener('click', (e) => {
+        if (window.innerWidth <= 1468) {
+            if (!notificationsPanel.contains(e.target) && !toggleButton.contains(e.target)) {
+                notificationsPanel.classList.remove('visible');
+            }
+        }
+    });
+
+    // Handle window resize
+    window.addEventListener('resize', () => {
+        if (window.innerWidth > 1468) {
+            notificationsPanel.classList.remove('visible');
+        }
+    });
+
+    function updateNotificationCount() {
+        const count = document.querySelectorAll('.notification-item').length;
+        const countElement = document.querySelector('.notification-count');
+        countElement.textContent = count;
+
+        if (count === 0) {
+            notificationsPanel.style.display = 'none';
+        }
+    }
+
     function getConfigDetails(card) {
         // const name = card.querySelector('.config-name').textContent;
         const details = Array.from(card.querySelectorAll('.config-detail')).map(detail => {

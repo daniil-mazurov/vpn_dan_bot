@@ -19,11 +19,10 @@
         DanVPN
       </a>
       <div class="nav-links">
-        <a href="/vpn/pricing">Pricing</a>
-        <a href="/vpn/instructions">Instructions</a>
-        <a href="/vpn/support">Support</a>
-        <a href="/vpn/contact">Contact</a>
-        <a href="/vpn/profile" class="cta-button">Login</a>
+        <a href="/vpn/pricing">Тарифы</a>
+        <a href="/vpn/instructions">Инструкции</a>
+        <a href="/bot/bug/create">Техподдержка</a>
+        <a href="/vpn/profile" class="cta-button">{{ name }}</a>
       </div>
     </div>
   </nav>
@@ -40,7 +39,7 @@
           <li>Standard speed</li>
           <li>1 device</li>
         </ul>
-        <a href="https://falconvpn.com/signup" class="cta-button">Try Now</a>
+        <a type="submit" class="cta-button" id="freeRateButton">Try Now</a>
       </div>
       <div class="pricing-card">
         <h3>Basic</h3>
@@ -51,7 +50,7 @@
           <li>High speed</li>
           <li>3 devices</li>
         </ul>
-        <a href="https://falconvpn.com/signup" class="cta-button">Get Started</a>
+        <a type="submit" class="cta-button" id="baseRateButton">Get Started</a>
       </div>
       <div class="pricing-card popular">
         <div class="popular-tag">Popular</div>
@@ -64,7 +63,7 @@
           <li>5 devices</li>
           <li>Priority support</li>
         </ul>
-        <a href="https://falconvpn.com/signup" class="cta-button">Get Started</a>
+        <a type="submit" class="cta-button" id="advancedRateButton">Get Started</a>
       </div>
       <div class="pricing-card">
         <h3>Luxury</h3>
@@ -77,7 +76,7 @@
           <li>24/7 Priority support</li>
           <li>Dedicated IP address</li>
         </ul>
-        <a href="https://falconvpn.com/signup" class="cta-button">Get Started</a>
+        <a type="submit" class="cta-button" id="luxuryRateButton">Get Started</a>
       </div>
     </div>
   </section>
@@ -91,10 +90,151 @@
     </div>
   </div>
 
+  <h1 style="text-align: center; margin-bottom: 1rem;"> </h1>
+
+
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="footer-links">
+        <a href="/vpn/about">О нас</a>
+        <a href="/vpn/docs/code/src.html">Разработчикам</a>
+        <a href="/vpn/docs/privacy">Privacy Policy</a>
+        <a href="https://github.com/daniil-mazurov/vpn_dan_bot">GitHub</a>
+      </div>
+      <div class="footer-bottom">
+        © 2024 DanVPN. All rights reserved.
+      </div>
+    </div>
+  </footer>
 
   <script src="/static/js/pricing.js"></script>
   <script src="/static/js/navbar.js"></script>
+  <script>
+    document.getElementById('freeRateButton').addEventListener('click', function (event) {
+      event.preventDefault();
 
+      fetch('/vpn/pricing/change_rate/free', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({})
+      })
+        .then(response => {
+          if (response.status === 200) {
+            console.log('Тариф сменен');
+            window.location.href = '/vpn/profile';
+          } else if (response.status === 401) {
+            console.log('Перенаправление...');
+            const redirectUrl = response.headers.get('Location');
+            if (redirectUrl) {
+              window.location.href = redirectUrl;
+            } else {
+              console.error('URL для перенаправления не найден');
+            }
+          } else {
+            console.error('Ошибка при смене тарифа');
+            window.location.href = '/vpn/500';
+          }
+        })
+        .catch(error => {
+          console.error('Ошибка сети:', error);
+        });
+    });
+    document.getElementById('baseRateButton').addEventListener('click', function (event) {
+      event.preventDefault();
+
+      fetch('/vpn/pricing/change_rate/base', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({})
+      })
+        .then(response => {
+          if (response.status === 200) {
+            console.log('Тариф сменен');
+            window.location.href = '/vpn/profile';
+          } else if (response.status === 401) {
+            console.log('Перенаправление...');
+            const redirectUrl = response.headers.get('Location');
+            if (redirectUrl) {
+              window.location.href = redirectUrl;
+            } else {
+              console.error('URL для перенаправления не найден');
+            }
+          } else {
+            console.error('Ошибка при смене тарифа');
+            window.location.href = '/vpn/500';
+          }
+        })
+        .catch(error => {
+          console.error('Ошибка сети:', error);
+        });
+    });
+    document.getElementById('advancedRateButton').addEventListener('click', function (event) {
+      event.preventDefault();
+
+      fetch('/vpn/pricing/change_rate/advanced', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({})
+      })
+        .then(response => {
+          if (response.status === 200) {
+            console.log('Тариф сменен');
+            window.location.href = '/vpn/profile';
+          } else if (response.status === 401) {
+            console.log('Перенаправление...');
+            const redirectUrl = response.headers.get('Location');
+            if (redirectUrl) {
+              window.location.href = redirectUrl;
+            } else {
+              console.error('URL для перенаправления не найден');
+            }
+          } else {
+            console.error('Ошибка при смене тарифа');
+            window.location.href = '/vpn/500';
+          }
+        })
+        .catch(error => {
+          console.error('Ошибка сети:', error);
+        });
+    });
+    document.getElementById('luxuryRateButton').addEventListener('click', function (event) {
+      event.preventDefault();
+
+      fetch('/vpn/pricing/change_rate/luxury', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({})
+      })
+        .then(response => {
+          if (response.status === 200) {
+            console.log('Тариф сменен');
+            window.location.href = '/vpn/profile';
+          } else if (response.status === 401) {
+            console.log('Перенаправление...');
+            const redirectUrl = response.headers.get('Location');
+            if (redirectUrl) {
+              window.location.href = redirectUrl;
+            } else {
+              console.error('URL для перенаправления не найден');
+            }
+          } else {
+            console.error('Ошибка при смене тарифа');
+            window.location.href = '/vpn/500';
+          }
+        })
+        .catch(error => {
+          console.error('Ошибка сети:', error);
+        });
+    });
+  </script>
 </body>
 
 </html>

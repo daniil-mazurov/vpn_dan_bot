@@ -64,3 +64,24 @@ class ReportStatus(enum.Enum):
             str: Строковое представление статуса отчета.
         """
         return self.value
+
+
+class NotificationType(enum.Enum):
+    """Тип уведомления"""
+
+    success = "success"
+    """Уведомление об успешной операции"""
+    error = "error"
+    """Уведомление об ошибочной операции"""
+    warning = "warning"
+    """Важно уведомление"""
+    info = "info"
+    """Информация для пользователя"""
+
+    def __str__(self) -> str:
+        """Возвращает строковое представление типа уведомления.
+
+        Returns:
+            str: Строковое представление типа уведомления.
+        """
+        return self.value

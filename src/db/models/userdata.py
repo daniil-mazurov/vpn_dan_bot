@@ -8,6 +8,9 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from core.config import Base
 from db.models import UserActivity
+from db.models.notifications import Notifications
+from db.models.reports import Reports
+from db.models.transactions import Transactions
 from db.models.wg_config import WgConfig
 
 
@@ -62,6 +65,21 @@ class UserData(Base):
         back_populates="conf_connect", lazy="subquery"
     )
     """list[WgConfig]: Связанные конфигурации WG пользователя."""
+
+    transactions: Mapped[list["Transactions"]] = relationship(
+        back_populates="transact_connect", lazy="subquery"
+    )
+    """list[Transactions]: Связанные транзакции пользователя."""
+
+    reports: Mapped[list["Reports"]] = relationship(
+        back_populates="rep_connect", lazy="subquery"
+    )
+    """list[Reports]: Связанные обращения пользователя."""
+
+    notifications: Mapped[list["Notifications"]] = relationship(
+        back_populates="notif_connect", lazy="subquery"
+    )
+    """list[Notifications]: Связанные уведомления пользователя."""
 
     # @hybrid_property
     def fbalance(self):
@@ -132,6 +150,22 @@ class UserData(Base):
             return values
 
         model_config = ConfigDict(extra="ignore")
+
+    class ValidationSchemaExtended(ValidationSchema):
+        transactions: list["Transactions.ValidationSchema"] = Field(
+            default=[], title="User Transactions"
+        )
+        """Транзакции пользователя."""
+
+        reports: list["Reports.ValidationSchema"] = Field(
+            default=[], title="User Reports"
+        )
+        """Обращения пользователя."""
+
+        notifications: list["Notifications.ValidationSchema"] = Field(
+            default=[], title="User Notifications"
+        )
+        """Уведомления пользователя."""
 
     # INTERFACE (fastui)
     site_display = [

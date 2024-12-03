@@ -17,6 +17,7 @@
 - FreezeSteps: Шаги заморозки.
 - ReportStatus: Статусы отчетов.
 - UserActivity: Статусы активности пользователей.
+- Notifications: Типы уведомлений.
 
 Словарь TABLES_SCHEMA сопоставляет названия таблиц с их соответствующими моделями.
 
@@ -27,8 +28,10 @@ Attributes:
 
 from core.config import Base
 from db import ddl as _  # NOTE TRIGGERS
-from db.models.enums import FreezeSteps, ReportStatus, UserActivity
+from db.models.enums import (FreezeSteps, NotificationType, ReportStatus,
+                             UserActivity)
 from db.models.news import News
+from db.models.notifications import Notifications
 from db.models.reports import Reports
 from db.models.transactions import Transactions
 from db.models.userdata import UserData
@@ -43,4 +46,5 @@ TABLES_SCHEMA = {
     Reports.__tablename__: Reports,
     YoomoneyOperation.__tablename__: YoomoneyOperation,
     News.__tablename__: News,
+    Notifications.__tablename__: Notifications,
 }

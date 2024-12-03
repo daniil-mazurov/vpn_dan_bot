@@ -6,7 +6,7 @@ from fastui.components.display import DisplayLookup, DisplayMode
 from fastui.events import GoToEvent
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 from sqlalchemy import BigInteger, DateTime, ForeignKey
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from core.config import Base
 
@@ -54,6 +54,11 @@ class Transactions(Base):
     # additionally
     transaction_reference: Mapped[str]
     """str: Ссылка на транзакцию."""
+    
+    transact_connect: Mapped["UserData"] = relationship(  # noqa: F821 # type: ignore
+        back_populates="transactions", lazy="subquery"
+    )
+    """UserData: Связанные транзакции пользователя"""
 
     class ValidationSchema(BaseModel):
         """Схема валидации для модели транзакций.

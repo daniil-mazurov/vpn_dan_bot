@@ -2,8 +2,8 @@ import logging
 import os
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Request
-from fastapi.responses import HTMLResponse
+from fastapi import APIRouter, Depends, Request, status
+from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 
 from core.config import settings
@@ -28,52 +28,51 @@ async def profile_page(
     user: Annotated[User, Depends(User.from_request)],
 ):
     try:
-        user_data = await utils.get_user_with_configs(user.user_id)
-
-        raw_transactions = await utils.get_user_transactions(user.user_id)
+        user_data = (await utils.get_all_userdata(user.user_id)).model_dump()
 
         server_status = await WgServerTools().get_server_status()
 
     except DatabaseError:
         logger.exception(f"Ошибка БД при загрузке профиля пользователя {user.user_id}")
-        return templates.TemplateResponse("500.html", {"request": request})
+        return RedirectResponse(
+            url="/vpn/500", status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
 
     except Exception:
         logger.exception(
             f"Неизвестная ошибка при загрузке профиля пользователя {user.user_id}"
         )
-        return templates.TemplateResponse("500.html", {"request": request})
+        return RedirectResponse(
+            url="/vpn/500", status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
 
     else:
-        configs = []
-        for config in user_data.configs:
-            config = config.__ustr_dict__
+        for config in user_data.get("configs"):
             config["PersistentKeepalive"] = 25
             config["PublicKey"] = settings.WG_SERVER_KEY
 
-            configs.append(config)
-
-        transactions = []
-        for transaction in raw_transactions:
+        for transaction in user_data.get("transactions"):
             # TODO transaction_id
 
-            transaction.date = transaction.date.date()
-            transaction.amount = round(transaction.amount, 2)
-            transaction = transaction.__udict__
-            transactions.append(transaction)
+            transaction["date"] = transaction["date"].date()
+            transaction["amount"] = round(transaction["amount"], 2)
 
         return templates.TemplateResponse(
             "profile.html",
             {
                 "request": request,
-                "user": user_data.__ustr_dict__,
+                "user": user_data,
                 "avatar": "".join(
-                    [word[0] for word in user_data.telegram_name.split()]
+                    [word[0] for word in user_data["telegram_name"].split()]
                 ).upper(),
-                "rate": rates.get(user_data.stage, "Не выбран"),
-                "rate_cost": round(user_data.stage * settings.cost, 2),
-                "configsData": configs,
+                "rate": rates.get(user_data["stage"], "Не выбран"),
+                "rate_cost": round(user_data["stage"] * settings.cost, 2),
+                "configsData": user_data["configs"],
                 "server": server_status,
-                "transactions": transactions,
+                "transactions": user_data["transactions"],
+                "notifications": {
+                    "data": user_data["notifications"],
+                    "len": len(user_data["notifications"]),
+                },
             },
         )

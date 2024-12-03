@@ -6,7 +6,7 @@ from fastui.events import GoToEvent
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 from sqlalchemy import BigInteger, Date, DateTime, Enum, ForeignKey, func
 from sqlalchemy.dialects.postgresql import JSONB
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from core.config import Base
 from db.models import ReportStatus
@@ -54,6 +54,11 @@ class Reports(Base):
         onupdate=func.current_timestamp(),
     )
     """datetime: Дата и время последнего обновления отчета."""
+
+    rep_connect: Mapped["UserData"] = relationship(  # noqa: F821 # type: ignore
+        back_populates="reports", lazy="subquery"
+    )
+    """UserData: Связанные обращения пользователя"""
 
     class ValidationSchema(BaseModel):
         """Схема валидации для модели отчетов.

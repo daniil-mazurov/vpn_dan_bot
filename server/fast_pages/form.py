@@ -172,7 +172,7 @@ async def big_form_post(form: Annotated[BugModel, patched_fastui_form(BugModel)]
                 footer=[
                     c.Button(
                         text="Принято",
-                        on_click=GoToEvent(url=f"{settings.subserver_url}/vpn"),
+                        on_click=GoToEvent(url=f"{settings.subserver_url}vpn"),
                     ),
                 ],
                 open_trigger=PageEvent(name="bug-sended"),
