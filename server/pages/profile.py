@@ -5,6 +5,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, Request, status
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
+from pydantic import BaseModel
 
 from core.config import settings
 from db import utils
@@ -28,7 +29,7 @@ async def profile_page(
     user: Annotated[User, Depends(User.from_request)],
 ):
     try:
-        user_data = (await utils.get_all_userdata(user.user_id)).model_dump()
+        user_data = (await utils.get_all_userdata(user.user_id)).model_dump(mode="json")
 
         server_status = await WgServerTools().get_server_status()
 
@@ -51,11 +52,11 @@ async def profile_page(
             config["PersistentKeepalive"] = 25
             config["PublicKey"] = settings.WG_SERVER_KEY
 
-        for transaction in user_data.get("transactions"):
-            # TODO transaction_id
+        # for transaction in user_data.get("transactions"):
+        #     # TODO transaction_id
 
-            transaction["date"] = transaction["date"].date()
-            transaction["amount"] = round(transaction["amount"], 2)
+        # transaction["date"] = transaction["date"].date()
+        # transaction["amount"] = round(transaction["amount"], 2)
 
         return templates.TemplateResponse(
             "profile.html",
@@ -71,8 +72,42 @@ async def profile_page(
                 "server": server_status,
                 "transactions": user_data["transactions"],
                 "notifications": {
-                    "data": user_data["notifications"],
+                    "data": sorted(
+                        user_data["notifications"], key=lambda x: x["id"], reverse=True
+                    ),
                     "len": len(user_data["notifications"]),
                 },
             },
         )
+
+
+class CloseNotificationRequest(BaseModel):
+    id: int
+
+
+@router.post("/close_notification")
+async def close_notification(
+    request: CloseNotificationRequest,
+    user: Annotated[User, Depends(User.from_request)],
+):
+    try:
+        notification_id = request.id  # Получаем ID уведомления
+        await utils.remove_notification(notification_id)
+    except DatabaseError:
+        logger.exception(
+            f"Ошибка БД при удалении уведомления пользователя {user.user_id}"
+        )
+        return RedirectResponse(
+            url="/vpn/500", status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+    except Exception:
+        logger.exception(
+            f"Неизвестная ошибка при удалении уведомления пользователя {user.user_id}"
+        )
+        return RedirectResponse(
+            url="/vpn/500", status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+    else:
+        return {"answer": "ok"}

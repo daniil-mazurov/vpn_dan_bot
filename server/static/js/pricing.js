@@ -1,6 +1,6 @@
 
 const planDetails = {
-    'Trial': {
+    'Пробный': {
         description: 'Perfect for testing our service. Experience basic VPN features with limited server access.',
         features: {
             'Basic VPN Features': 'Access to essential VPN security features and protocols',
@@ -9,7 +9,7 @@ const planDetails = {
             '1 Device': 'VPN protection for a single device'
         }
     },
-    'Basic': {
+    'Базовый': {
         description: 'Great for individual users who need reliable VPN protection with more flexibility.',
         features: {
             'All VPN Features': 'Full access to all VPN security features and protocols',
@@ -18,7 +18,7 @@ const planDetails = {
             '3 Devices': 'Protect up to 3 devices simultaneously'
         }
     },
-    'Advanced': {
+    'Расширенный': {
         description: 'Our most popular plan, perfect for families or users with multiple devices.',
         features: {
             'All VPN Features': 'Complete access to premium VPN features',
@@ -28,7 +28,7 @@ const planDetails = {
             'Priority Support': 'Fast response times from our support team'
         }
     },
-    'Luxury': {
+    'Люкс': {
         description: 'Ultimate protection and freedom with no limitations.',
         features: {
             'All VPN Features': 'Premium access to all current and future features',
@@ -53,7 +53,7 @@ document.querySelectorAll('.pricing-card').forEach(card => {
         const modalDescription = modal.querySelector('.modal-description');
         const modalFeatures = modal.querySelector('.modal-features');
 
-        modalTitle.textContent = planName + ' Plan';
+        modalTitle.textContent = planName + ' тариф';
         modalDescription.textContent = plan.description;
 
         modalFeatures.innerHTML = Object.entries(plan.features)

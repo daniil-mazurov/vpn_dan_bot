@@ -1,13 +1,13 @@
-from datetime import datetime, timezone
 import logging
 import os
+from datetime import datetime
 from typing import Annotated, Literal
 
 from fastapi import APIRouter, Depends, Request, Response, status
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
-from pydantic import BaseModel
 
+from core.config import settings
 from db import models as mod
 from db import utils
 from server.pages.auth import User
@@ -28,18 +28,25 @@ async def pricing_page(
     request: Request,
     user: Annotated[User, Depends(User.from_request_opt)],
 ):
+    rates_costs = {
+        name: {
+            "day": round(multiplier * settings.cost, 2),
+            "month": round(multiplier * settings.cost * 30),
+        }
+        for multiplier, name in rates.items()
+    }
     return templates.TemplateResponse(
         "pricing.html",
         {
             "request": request,
             "name": "Профиль" if user else "Войти",
+            "rates_costs": rates_costs,
         },
     )
 
 
 @router.post("/change_rate/{rate}")
 async def set_new_rate(
-    response: Response,
     rate: Literal["free", "base", "advanced", "luxury"],
     user: Annotated[User, Depends(User.from_request)],
 ):
@@ -48,31 +55,45 @@ async def set_new_rate(
         rate_id = reverse_rates.get(rate)
 
         if not user_data:
-            return {"message": "Профиль не найден"}
+            return
         elif user_data.stage == rate_id:
             await utils.add_notification(
                 mod.Notifications.ValidationSchema(
                     user_id=user.user_id,
                     type=mod.NotificationType.error,
-                    message="У вас уже подключен этот тариф",
-                    date=datetime.now(timezone.utc),
+                    message=f"У вас уже подключен тариф '{rates[rate_id]}'",
+                    date=datetime.now().ctime(),
                 )
             )
 
             return
         elif user_data.stage == 0.3:
-            return {
-                "message": "Дождитесь окончания пробного периода или пополните баланс"
-            }
+            await utils.add_notification(
+                mod.Notifications.ValidationSchema(
+                    user_id=user.user_id,
+                    type=mod.NotificationType.error,
+                    message="Дождитесь окончания пробного периода или пополните баланс",
+                    date=datetime.now().ctime(),
+                )
+            )
+
+            return
         elif rate_id == 0.3:
             if user_data.free:
                 await utils.update_rate_user(
                     user_data.telegram_id, stage=rate_id, trial=True
                 )
             else:
-                return {
-                    "message": "К сожалению вы исчерпали возможность подключения пробного периода"
-                }
+                await utils.add_notification(
+                    mod.Notifications.ValidationSchema(
+                        user_id=user.user_id,
+                        type=mod.NotificationType.error,
+                        message="К сожалению вы исчерпали возможность подключения пробного периода",
+                        date=datetime.now().ctime(),
+                    )
+                )
+
+                return
         elif user_data.stage > rate_id:
             await utils.update_rate_user(
                 user_data.telegram_id, stage=rate_id, tax=user_data.stage * 10
@@ -95,4 +116,12 @@ async def set_new_rate(
 
     else:
         logger.info(f"Изменение тарифа на {rates[rate_id]} успешно!")
-        return {"message": f"Изменение тарифа на {rates[rate_id]} успешно!"}
+
+        await utils.add_notification(
+            mod.Notifications.ValidationSchema(
+                user_id=user.user_id,
+                type=mod.NotificationType.success,
+                message=f"Изменение тарифа на {rates[rate_id]} успешно!",
+                date=datetime.now().ctime(),
+            )
+        )

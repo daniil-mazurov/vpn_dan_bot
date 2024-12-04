@@ -81,52 +81,71 @@ document.addEventListener('DOMContentLoaded', function () {
         historyModal.style.display = 'flex';
     });
 
+    const notificationsToggle = document.querySelector('.notifications-toggle');
+    const notificationsPanel = document.querySelector('.notifications-panel');
+    const notificationsBadge = document.querySelector('.notifications-badge');
+
+    // Initially hide the panel
+    notificationsPanel.classList.remove('show');
+
+    notificationsToggle.addEventListener('click', () => {
+        notificationsPanel.classList.toggle('show');
+        notificationsToggle.classList.remove('has-notifications');
+    });
+
     // Add notification handling
     document.querySelectorAll('.notification-close').forEach(button => {
-        button.addEventListener('click', (e) => {
-            const notification = e.target.closest('.notification-item');
+        button.addEventListener('click', (event) => {
+            const notification = event.target.closest('.notification-item');
+            const notificationId = notification.getAttribute('data-id'); // Получаем ID уведомления
+
             notification.style.animation = 'fadeOut 0.3s ease-out';
             setTimeout(() => {
                 notification.remove();
                 updateNotificationCount();
             }, 300);
-            e.stopPropagation();
+            event.stopPropagation();
+
+
+            event.preventDefault();
+
+            fetch('/vpn/profile/close_notification', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ id: notificationId }) // Отправляем ID в теле запроса
+            })
+                .then(response => {
+                    if (response.status === 200) {
+                        console.log('Уведомление удалено');
+                    }
+                    else {
+                        console.error('Ошибка при удалении уведомления');
+                    }
+                })
+                .catch(error => {
+                    console.error('Ошибка сети:', error);
+                });
         });
-    });
-
-    // Add notification toggle button to the DOM
-    const toggleButton = document.querySelector('.notifications-toggle');
-    const notificationsPanel = document.querySelector('.notifications-panel');
-
-    toggleButton.addEventListener('click', () => {
-        notificationsPanel.classList.toggle('visible');
-    });
-
-    // Close notifications when clicking outside on mobile
-    document.addEventListener('click', (e) => {
-        if (window.innerWidth <= 1468) {
-            if (!notificationsPanel.contains(e.target) && !toggleButton.contains(e.target)) {
-                notificationsPanel.classList.remove('visible');
-            }
-        }
-    });
-
-    // Handle window resize
-    window.addEventListener('resize', () => {
-        if (window.innerWidth > 1468) {
-            notificationsPanel.classList.remove('visible');
-        }
     });
 
     function updateNotificationCount() {
         const count = document.querySelectorAll('.notification-item').length;
         const countElement = document.querySelector('.notification-count');
+        notificationsBadge.textContent = count;
         countElement.textContent = count;
 
         if (count === 0) {
-            notificationsPanel.style.display = 'none';
+            notificationsPanel.classList.remove('show');
+            notificationsToggle.style.display = 'none';
+        } else {
+            notificationsToggle.classList.add('has-notifications');
         }
     }
+
+    // Initial call to set up notification count
+    updateNotificationCount();
 
     function getConfigDetails(card) {
         // const name = card.querySelector('.config-name').textContent;

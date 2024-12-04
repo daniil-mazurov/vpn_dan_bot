@@ -536,7 +536,7 @@ body {
 .pricing-card {
     background: rgba(255, 255, 255, 0.05);
     border-radius: 10px;
-    padding: 2rem;
+    padding: 0.7rem;
     text-align: center;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     position: relative;
@@ -562,8 +562,8 @@ body {
 
 .popular-tag {
     position: absolute;
-    top: 1rem;
-    right: -2rem;
+    top: 0.9rem;
+    right: -2.5rem;
     background: var(--accent);
     padding: 0.5rem 3rem;
     transform: rotate(45deg);
@@ -573,6 +573,7 @@ body {
 .pricing-card h3 {
     font-size: 1.5rem;
     margin-bottom: 1rem;
+    margin-top: 1.3rem;
 }
 
 .price {
@@ -602,6 +603,86 @@ body {
     margin-right: 0.5rem;
 }
 
+.info-indicator {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    width: 24px;
+    height: 24px;
+    fill: var(--accent);
+    opacity: 0.7;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.pricing-card:hover .info-indicator {
+    opacity: 1;
+    transform: scale(1.1);
+}
+
+@keyframes pulseInfo {
+    0% {
+        transform: scale(1);
+        opacity: 0.7;
+    }
+
+    50% {
+        transform: scale(1.1);
+        opacity: 1;
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 0.7;
+    }
+}
+
+.pricing-card:hover .info-indicator {
+    animation: pulseInfo 1.5s infinite;
+}
+
+.cursor-hint {
+    position: relative;
+    font-size: 0.8rem;
+    color: var(--accent);
+    opacity: 0;
+    transform: translateY(1px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.pricing-card:hover .cursor-hint {
+    opacity: 0.8;
+    transform: translateY(0);
+}
+
+.info-panel {
+    margin-top: 3rem;
+    padding: 1.5rem;
+    background: rgba(0, 102, 204, 0.1);
+    border-left: 4px solid var(--accent);
+    border-radius: 5px;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.info-panel-content {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+}
+
+.warning-icon {
+    fill: var(--accent);
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.info-panel p {
+    margin: 0;
+    line-height: 1.5;
+    color: var(--text);
+    opacity: 0.9;
+}
 
 .privacy-container {
     max-width: 800px;

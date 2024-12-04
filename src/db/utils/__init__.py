@@ -42,7 +42,8 @@
 - Пользовательские уведомления:
     - get_notifications: Получить уведомления пользователя
     - add_notification: Добавить уведомление
-    
+    - remove_notification: Удалить уведомление
+
 - Конфигурации WireGuard:
     - add_wg_config: Добавляет конфигурацию WireGuard.
     - freeze_config: Замораживает конфигурацию WireGuard.
@@ -54,7 +55,8 @@
 from db.utils.admin import (get_admins, get_all_users, get_valid_users,
                             set_admin)
 from db.utils.news import add_news
-from db.utils.notifications import add_notification, get_notifications
+from db.utils.notifications import (add_notification, get_notifications,
+                                    remove_notification)
 from db.utils.reports import add_report
 from db.utils.save import async_backup, dump
 from db.utils.tests import test_server_speed

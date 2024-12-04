@@ -4,7 +4,8 @@ from uuid import UUID
 
 from fastui.components.display import DisplayLookup, DisplayMode
 from fastui.events import GoToEvent
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import (BaseModel, ConfigDict, Field, field_validator,
+                      model_validator)
 from sqlalchemy import BigInteger, DateTime, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -54,7 +55,7 @@ class Transactions(Base):
     # additionally
     transaction_reference: Mapped[str]
     """str: Ссылка на транзакцию."""
-    
+
     transact_connect: Mapped["UserData"] = relationship(  # noqa: F821 # type: ignore
         back_populates="transactions", lazy="subquery"
     )
@@ -100,6 +101,11 @@ class Transactions(Base):
 
         site_date: str = Field(init=False, title="Transaction date", default="00:00")
         """Строковое представление даты транзакции (не инициализируется при создании)."""
+
+        @field_validator("amount", "withdraw_amount")
+        def round_amount(cls, v):
+            """Сумма транзакции (округленная)."""
+            return round(v, 2)
 
         @model_validator(mode="before")
         def convert_str_to_none(cls, values):

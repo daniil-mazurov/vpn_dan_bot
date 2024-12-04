@@ -4,7 +4,7 @@
   <base href="." />
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>DanVPN - Простой и быстрый VPN-сервис</title>
+  <title>DanVPN - Личный профиль</title>
   <link rel="stylesheet" href="/static/css/profile.css">
   <link rel="stylesheet" href="/static/css/navbar.css">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
@@ -26,6 +26,16 @@
       </div>
     </div>
   </nav>
+  
+  <button class="notifications-toggle">
+    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"
+      stroke-linecap="round" stroke-linejoin="round">
+      <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+      <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+    </svg>
+    <span class="notifications-badge"></span>
+  </button>
+
 
   <div class="profile-container">
     <div class="user-header">
@@ -69,17 +79,7 @@
       <div class="status-card">
         <div class="status-title">Статус аккаунта</div>
         <div class="status-value">
-          {% if "active" == user.active %}
-          <span class="status-badge badge-active">{{ user.active }}</span>
-          {% elif "inactive" == user.active %}
-          <span class="status-badge badge-inactive">{{ user.active }}</span>
-          {% elif "freezed" == user.active %}
-          <span class="status-badge badge-freezed">{{ user.active }}</span>
-          {% elif "banned" == user.active %}
-          <span class="status-badge badge-banned">{{ user.active }}</span>
-          {% else %}
-          <span class="status-badge badge-deleted">{{ user.active }}</span>
-          {% endif %}
+          <span class="status-badge badge-{{ user.active }}">{{ user.active }}</span>
         </div>
       </div>
 
@@ -248,7 +248,7 @@
           <tbody>
             {% for transaction in transactions %}
             <tr>
-              <td>{{ transaction.date }}</td>
+              <td>{{ transaction.site_date }}</td>
               <td>{{ transaction.transaction_id }}</td>
               {% if transaction.amount < 0 %} <td class="amount-negative">{{ transaction.amount }}₽</td>
                 {% else %}
@@ -273,7 +273,7 @@
       </div>
     </div>
     {% for notification in notifications.data %}
-    <div class="notification-item {{ notification.type }}">
+    <div class="notification-item {{ notification.type }}" data-id="{{ notification.id }}">
       <button class="notification-close">&times;</button>
       <div class="notification-message">
         {{ notification.message }}
@@ -282,65 +282,38 @@
     </div>
     {% endfor %}
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="/static/js/profile.js"></script>
+    <script src="/static/js/navbar.js"></script>
+    <script>
+      document.getElementById('changePlanButton').addEventListener('click', function () {
+        window.location.href = "/vpn/pricing";
+      });
+    </script>
+    <script>
+      document.getElementById('logoutButton').addEventListener('click', function (event) {
+        event.preventDefault();
 
-    <!-- <div class="notification-item unread warning">
-      <button class="notification-close">&times;</button>
-      <div class="notification-message">
-        Your subscription will expire in 3 days. Please renew to avoid service interruption.
-      </div>
-      <div class="notification-time">1 hour ago</div>
-    </div>
-
-    <div class="notification-item info">
-      <button class="notification-close">&times;</button>
-      <div class="notification-message">
-        New server location available in Singapore. Try it now!
-      </div>
-      <div class="notification-time">1 day ago</div>
-    </div> -->
-  </div>
-
-  <!-- Notifications Toggle Button -->
-  <button class="notifications-toggle">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-      stroke-linejoin="round">
-      <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
-      <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
-    </svg>
-  </button>
-
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-  <script src="/static/js/profile.js"></script>
-  <script src="/static/js/navbar.js"></script>
-  <script>
-    document.getElementById('changePlanButton').addEventListener('click', function () {
-      window.location.href = "/vpn/pricing";
-    });
-  </script>
-  <script>
-    document.getElementById('logoutButton').addEventListener('click', function (event) {
-      event.preventDefault();
-
-      fetch('/vpn/auth/logout', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({})
-      })
-        .then(response => {
-          if (response.status === 200) {
-            console.log('Вы вышли успешно');
-            window.location.href = '/vpn';
-          } else {
-            console.error('Ошибка при выходе');
-          }
+        fetch('/vpn/auth/logout', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({})
         })
-        .catch(error => {
-          console.error('Ошибка сети:', error);
-        });
-    });
-  </script>
+          .then(response => {
+            if (response.status === 200) {
+              console.log('Вы вышли успешно');
+              window.location.href = '/vpn';
+            } else {
+              console.error('Ошибка при выходе');
+            }
+          })
+          .catch(error => {
+            console.error('Ошибка сети:', error);
+          });
+      });
+    </script>
 </body>
 
 </html>

@@ -34,12 +34,8 @@ class Notifications(Base):
     message: Mapped[str]
     """str: Содержание уведомления."""
 
-    date: Mapped[datetime] = mapped_column(
-        type_=DateTime(timezone=True),
-        server_default=func.now(),
-        onupdate=func.current_timestamp(),
-    )
-    """datetime: Дата создания уведомления (по умолчанию - текущая дата)."""
+    date: Mapped[str] = mapped_column(default=lambda: datetime.now().ctime())
+    """datetime(str): Дата создания уведомления (по умолчанию - текущая дата)."""
 
     notif_connect: Mapped["UserData"] = relationship(  # noqa: F821 # type: ignore
         back_populates="notifications", lazy="subquery"
@@ -64,7 +60,7 @@ class Notifications(Base):
         message: str = Field(title="Message")
         """Заголовок уведомления."""
 
-        date: datetime = Field(title="Create date")
+        date: str = Field(title="Create date")
         """Дата создания уведомления."""
 
         model_config = ConfigDict(extra="ignore")
@@ -77,7 +73,7 @@ class Notifications(Base):
         ),
         DisplayLookup(field="type"),
         DisplayLookup(field="message"),
-        DisplayLookup(field="date", mode=DisplayMode.datetime),
+        DisplayLookup(field="date"),
     ]
     """list[DisplayLookup]: Отображение уведомлений на сайте."""
 

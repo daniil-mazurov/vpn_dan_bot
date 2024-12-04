@@ -2,7 +2,7 @@
 
 import logging
 
-from sqlalchemy import desc, insert, select
+from sqlalchemy import delete, desc, insert, select
 
 from core.metric import async_speed_metric
 from db.database import execute_query
@@ -35,7 +35,18 @@ async def add_notification(notification: Notifications.ValidationSchema):
     # await CashManager(Notifications).delete(user_id)
 
     query = (
-        insert(Notifications).values(notification.model_dump(exclude='id')).returning(Notifications)
+        insert(Notifications)
+        .values(notification.model_dump(exclude="id"))
+        .returning(Notifications)
     )
 
     return (await execute_query(query)).scalar_one_or_none()
+
+
+@async_speed_metric
+async def remove_notification(notification_id: int):
+    # await CashManager(Notifications).delete(user_id)
+
+    query = delete(Notifications).where(Notifications.id == notification_id)
+
+    await execute_query(query)
