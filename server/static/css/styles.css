@@ -520,6 +520,11 @@ body {
     line-height: 1.6;
 }
 
+.modal-description-tax {
+    margin-bottom: 1.5rem;
+    line-height: 1.6;
+}
+
 .pricing-section {
     padding: 8rem 2rem 4rem;
     max-width: 1200px;

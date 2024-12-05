@@ -1,42 +1,48 @@
 
 const planDetails = {
     'Пробный': {
-        description: 'Perfect for testing our service. Experience basic VPN features with limited server access.',
+        description: 'Идеально подходит для тестирования нашего сервиса. Может быть подключен единоразово. Подключение другого тарифа лишает пользователя возможности подключить этот тариф',
+        tax: 0,
         features: {
-            'Basic VPN Features': 'Access to essential VPN security features and protocols',
-            '3 Server Locations': 'Connect to servers in 3 strategic locations',
-            'Standard Speed': 'Reliable connection speeds for regular browsing',
-            '1 Device': 'VPN protection for a single device'
+            'Базовый функционал': 'Воспользуйтесь базовыми функциями VPN с ограниченным доступом к сервисам',
+            'Неограниченная скорость': 'Скорость подключения по VPN не ограничена',
+            'Отсутствие рекламы': 'Никакой рекламы, никакого спама, никаких уведомлений',
+            '1 Устройство': 'Доступно создание 1 конфигурации'
         }
     },
     'Базовый': {
-        description: 'Great for individual users who need reliable VPN protection with more flexibility.',
+        description: 'Отлично подходит для индивидуальных пользователей, которым требуется быстрый и легкий VPN сервис',
+        tax: 0,
         features: {
-            'All VPN Features': 'Full access to all VPN security features and protocols',
-            '10 Server Locations': 'Connect to servers in 10 different countries',
-            'High Speed': 'Enhanced connection speeds for streaming and downloads',
-            '3 Devices': 'Protect up to 3 devices simultaneously'
+            'Базовый функционал': 'Воспользуйтесь базовыми функциями VPN с ограниченным доступом к сервисам',
+            'Неограниченная скорость': 'Скорость подключения по VPN не ограничена',
+            'Отсутствие рекламы': 'Никакой рекламы, никакого спама, никаких уведомлений',
+            '3 Устройства': 'Доступно создание 3-х конфигураций'
         }
     },
     'Расширенный': {
-        description: 'Our most popular plan, perfect for families or users with multiple devices.',
+        description: 'Наш самый популярный тарифный план, идеально подходящий для семей или пользователей с несколькими устройствами.',
+        tax: 25,
         features: {
-            'All VPN Features': 'Complete access to premium VPN features',
-            'All Server Locations': 'Unlimited access to our global server network',
-            'Ultra-fast Speed': 'Optimized speeds for gaming and HD streaming',
-            '5 Devices': 'Protection for up to 5 devices',
-            'Priority Support': 'Fast response times from our support team'
+            'Расширенный функционал': 'Полный доступ ко всем возможностям сервиса',
+            'Неограниченная скорость': 'Скорость подключения по VPN не ограничена',
+            'Отсутствие рекламы': 'Никакой рекламы, никакого спама, никаких уведомлений',
+            '8 Устройств': 'Доступно создание 8-ми конфигураций',
+            'Уведомления': 'Возможность отключать ненужные уведомления от сервиса',
+            'Инструменты': 'Доступны различные инструменты анализа работы VPN сервиса: скорость и загруженность сервера, ',
         }
     },
     'Люкс': {
-        description: 'Ultimate protection and freedom with no limitations.',
+        description: 'Премиальный тариф для тех, кто хочет поддержать создателей сервиса',
+        tax: 50,
         features: {
-            'All VPN Features': 'Premium access to all current and future features',
-            'All Server Locations': 'Premium server access with optimized routing',
-            'Ultra-fast Speed': 'The fastest speeds we offer with no throttling',
-            'Unlimited Devices': 'No device limit - protect your whole network',
-            '24/7 Priority Support': 'Round-the-clock dedicated support',
-            'Dedicated IP': 'Your own private IP address'
+            'Расширенный функционал': 'Полный доступ ко всем возможностям сервиса',
+            'Неограниченная скорость': 'Скорость подключения по VPN не ограничена',
+            'Отсутствие рекламы': 'Никакой рекламы, никакого спама, никаких уведомлений',
+            '15 Устройств': 'Доступно создание 15-ти конфигураций',
+            'Уведомления': 'Возможность отключать ненужные уведомления от сервиса',
+            'Инструменты': 'Доступны различные инструменты анализа работы VPN сервиса: скорость и загруженность сервера',
+            '👑Приоритетный статус': 'Только обладатели тарифа Люкс могут подать заявку на получение статуса Администратор и имеют круглосуточный доступ к техподдержке сервиса (Поможет и расскажет как все настроить или починить)',
         }
     }
 };
@@ -51,10 +57,12 @@ document.querySelectorAll('.pricing-card').forEach(card => {
         const modal = document.getElementById('modal');
         const modalTitle = modal.querySelector('.modal-title');
         const modalDescription = modal.querySelector('.modal-description');
+        const modalDescriptionTax = modal.querySelector('.modal-description-tax');
         const modalFeatures = modal.querySelector('.modal-features');
 
         modalTitle.textContent = planName + ' тариф';
         modalDescription.textContent = plan.description;
+        modalDescriptionTax.textContent = 'Комиссия при понижении данного тарифа: ' + plan.tax + ' ₽';
 
         modalFeatures.innerHTML = Object.entries(plan.features)
             .map(([feature, detail]) => `
