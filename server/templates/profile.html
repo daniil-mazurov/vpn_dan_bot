@@ -26,7 +26,7 @@
       </div>
     </div>
   </nav>
-  
+
   <button class="notifications-toggle">
     <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"
       stroke-linecap="round" stroke-linejoin="round">
@@ -47,10 +47,10 @@
     </div>
 
     <div class="action-buttons">
-      <button class="action-button freeze">Freeze Account</button>
-      <button class="action-button new-config">New Configuration</button>
-      <button class="action-button change-plan" id="changePlanButton">Change Plan</button>
-      <button class="action-button add-funds">Add Funds</button>
+      <button class="action-button freeze">Заморозить аккаунт</button>
+      <button class="action-button new-config">Создать конфигурацию</button>
+      <button class="action-button change-plan" id="changePlanButton">Сменить тариф</button>
+      <button class="action-button add-funds">Пополнить баланс</button>
     </div>
 
     <div class="balance-card">
@@ -180,8 +180,14 @@
   <div class="modal-overlay" id="freezeModal">
     <div class="modal">
       <button class="modal-close">&times;</button>
-      <h3>Warning</h3>
-      <p>Are you sure you want to freeze your account? This will suspend all active VPN configurations.</p>
+      <h3>Внимание</h3>
+      <p>Заморозка аккаунта подразумевает приостановку ежедневных списаний и, соответственно, блокировку всех созданных
+        конфигураций.
+        Разморозить свой аккаунт можно в чат-боте(<a href="https://t.me/vpn_dan_bot">/app</a>) либо в личном профиле на
+        сайте. После разморозки восстановление конфигураций произойдет в течение 1 минуты.
+
+        Стоимость услуги равна одному ежедневному списанию вашего тарифа!
+        Разблокировка бесплатна.</p>
       <div class="modal-buttons">
         <button class="modal-button cancel">Cancel</button>
         <button class="modal-button confirm warning">Confirm Freeze</button>
@@ -192,8 +198,8 @@
   <div class="modal-overlay" id="configCreatedModal">
     <div class="modal">
       <button class="modal-close">&times;</button>
-      <h3>Success</h3>
-      <p>New VPN configuration has been created successfully!</p>
+      <h3>Успешно!</h3>
+      <p>Новая конфигурация для подключения к VPN сервису была создана.</p>
       <div class="modal-buttons">
         <button class="modal-button confirm">OK</button>
       </div>
@@ -203,14 +209,14 @@
   <div class="modal-overlay" id="addFundsModal">
     <div class="modal">
       <button class="modal-close">&times;</button>
-      <h3>Add Funds</h3>
+      <h3>Пополнить баланс</h3>
       <div class="funds-input">
-        <span class="currency">$</span>
-        <input type="number" id="fundsAmount" min="1" step="1" placeholder="Enter amount">
+        <span class="currency">₽</span>
+        <input type="number" id="fundsAmount" min="1" step="10" placeholder="Enter amount">
       </div>
       <div class="modal-buttons">
-        <button class="modal-button cancel">Cancel</button>
-        <button class="modal-button confirm">Add Funds</button>
+        <button class="modal-button cancel">Отмена</button>
+        <button class="modal-button confirm">Оплатить</button>
       </div>
     </div>
   </div>
@@ -218,16 +224,16 @@
   <div class="modal-overlay" id="textModal">
     <div class="modal">
       <button class="modal-close">&times;</button>
-      <h3>Configuration Details</h3>
+      <h3>Детали конфигурации</h3>
       <div class="config-text"></div>
-      <button class="copy-button">Copy Configuration</button>
+      <button class="copy-button">Скопировать конфигурацию</button>
     </div>
   </div>
 
   <div class="modal-overlay" id="qrModal">
     <div class="modal">
       <button class="modal-close">&times;</button>
-      <h3>Scan QR Code</h3>
+      <h3>Отсканируйте QR-код в приложении</h3>
       <div class="qr-code"></div>
     </div>
   </div>
@@ -268,7 +274,7 @@
   <div class="notifications-panel">
     <div class="notifications-header">
       <div class="notifications-title">
-        Notifications
+        Уведомления
         <span class="notification-count">{{ notifications.len }}</span>
       </div>
     </div>
