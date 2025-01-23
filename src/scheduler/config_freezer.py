@@ -108,6 +108,10 @@ async def validate_configs():
                     FreezeSteps.wait_no,
                 ):
                     to_unfreeze.append(config)
+            else:
+                logger.warning(
+                    f"Найдена незарегистрированная конфигурация: {config.address}"
+                )
 
         if to_freeze:
             await freeze_config(to_freeze, freeze=FreezeSteps.yes)

@@ -45,4 +45,5 @@ class WgConnection:
             settings.WG_HOST,
             username=settings.WG_USER,
             client_keys=settings.WG_KEY.get_secret_value(),
+            known_hosts=None,
         )

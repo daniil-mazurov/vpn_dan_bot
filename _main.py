@@ -21,13 +21,14 @@ sentry_sdk.init(
         AsyncioIntegration(),
         LoggingIntegration(level=logging.ERROR, event_level=logging.ERROR),
     ],
+    environment="development",
 )
 
 
 def main(args):
     """Точка входа"""
 
-    logger.info(f"<{'=' * 10} BOT START {'='*10}>", extra=args.__dict__)
+    logger.info(f"<{'=' * 10} BOT START {'=' * 10}>", extra=args.__dict__)
     asyncio.run(start_bot())
     logger.info("BOT CLOSE")
 
@@ -37,7 +38,7 @@ if __name__ == "__main__":
 
     for extra_logger in {logger.split(".")[0] for logger in logger.manager.loggerDict}:
         logging.getLogger(extra_logger).info(
-            f"<{'=' * 10} {extra_logger.upper()} START {'='*10}>"
+            f"<{'=' * 10} {extra_logger.upper()} START {'=' * 10}>"
         )
 
     args = parse_args()

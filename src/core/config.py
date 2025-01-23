@@ -2,6 +2,7 @@
 
 import logging
 import os
+import pickle
 from datetime import datetime
 
 from pandas import DataFrame
@@ -120,7 +121,6 @@ class Settings(BaseSettings):
     """Секрет для JWT."""
     ALGORITHM: str
     """Алгоритм шифрования jwt токена"""
-    
 
     WG_HOST: str
     """Хост WireGuard."""
@@ -194,11 +194,16 @@ except ValueError:
 
 last_updated = datetime.today()
 """Время последнего запуска"""
-decr_time = os.path.join(PATH, "src", "scheduler", "last_decremented.pickle")
+decr_time = os.path.join(
+    PATH, "src", "scheduler", "timepoint", "last_decremented.pickle"
+)
 """Сериализованная дата последнего списания средств"""
-noticed_time = os.path.join(PATH, "src", "scheduler", "last_noticed.pickle")
+noticed_time = os.path.join(
+    PATH, "src", "scheduler", "timepoint", "last_noticed.pickle"
+)
 """Сериализованная дата последнего уведомления пользователей"""
 
-# for timefile in (decr_time, noticed_time):
-#     with open(timefile, "wb") as file:
-#         pickle.dump(last_updated, file)
+for timefile in (decr_time, noticed_time):
+    if not os.path.isfile(timefile):
+        with open(timefile, "wb") as file:
+            pickle.dump(last_updated, file)

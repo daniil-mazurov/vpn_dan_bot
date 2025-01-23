@@ -117,9 +117,9 @@ class CashManager:
                 case dict():
                     self.pipe.hset(name=key, mapping=item)
                 case list() | tuple():
-                    self.pipe.rpush(name=key, *item)
+                    self.pipe.rpush(key, *item)
                 case set():
-                    self.pipe.sadd(name=key, *item)
+                    self.pipe.sadd(key, *item)
                 case str() | int() | float():
                     self.pipe.set(name=key, value=item)
 
@@ -184,7 +184,7 @@ class CashManager:
             rkeys = []
             pattern = ":*"
             for n in range(1, 4):
-                async for key in await iter_redis_keys(f"data{pattern*n}:{user_id}"):
+                async for key in await iter_redis_keys(f"data{pattern * n}:{user_id}"):
                     rkeys.append(key)
         if rkeys:
             self.pipe.delete(*rkeys)
