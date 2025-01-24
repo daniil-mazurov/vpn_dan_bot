@@ -66,8 +66,12 @@ async def find_config(callback: CallbackQuery):
     try:
         # Извлекаем конфигурацию пользователя из базы данных
         user_config = await utils.get_wg_config(callback.from_user.id, cfg_id)
+
+        assert user_config
     except exc.DatabaseError:
         # Обрабатываем ошибки базы данных
         await callback.answer(text=text.DB_ERROR, show_alert=True)
+    except AssertionError:
+        await callback.answer(text="Конфигурация не найдена", show_alert=True)
     else:
         return user_config

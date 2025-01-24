@@ -19,7 +19,7 @@ from core.metric import async_speed_metric
 from db import utils
 from db.models import FreezeSteps, UserActivity, UserData, WgConfig
 from handlers.utils import find_config, find_user
-from kb import get_config_keyboard, static_pay_button, why_freezed_button
+from kb import get_config_keyboard, remove_config, static_pay_button, why_freezed_button
 from wg.utils import WgServerTools
 
 logger = logging.getLogger()
@@ -161,10 +161,76 @@ async def create_config_data(trigger: Union[Message, CallbackQuery], bot: Bot):
             )
 
 
+@router.callback_query(F.data == "remove_config_confirm")
+@bot_except
+async def remove_config_data_confirm(callback: CallbackQuery):
+    """Подтверждение удаления конфигурации.
+
+    Args:
+        callback (CallbackQuery): Событие обратного вызова, инициировавшее команду.
+    """
+
+    with suppress(TelegramBadRequest):
+        await callback.message.edit_text(
+            "После удаления конфигурации вы больше не сможете подключаться по ней к VPN-серверу. "
+            "Для восстановления подключения вам необходимо будет создать новую конфигурацию и заменить ей старую в vpn-приложении"
+            f"\n\n? Вы уверены, что хотите удалить конфигурацию {callback.message.text}",
+            reply_markup=remove_config(),
+        )
+
+
+@router.callback_query(F.data == "remove_config_cancel")
+@bot_except
+async def remove_config_data_cancel(callback: CallbackQuery):
+    """Отмена удаления конфигурации.
+
+    Args:
+        callback (CallbackQuery): Событие обратного вызова, инициировавшее команду.
+    """
+    _, create_output_cfg_btn = get_config_keyboard()
+
+    *_, old_cfg_message = callback.message.text.split("удалить конфигурацию ")
+
+    with suppress(TelegramBadRequest):
+        await callback.message.edit_text(
+            old_cfg_message, reply_markup=create_output_cfg_btn
+        )
+
+
+@router.callback_query(F.data == "remove_config")
+@async_speed_metric
+@bot_except
+async def remove_config_data(callback: CallbackQuery, bot: Bot):
+    """Удаляет конфигурацию с WG сервера, а затем из БД.
+
+    Args:
+        callback (CallbackQuery): Событие обратного вызова, инициировавшее команду.
+    """
+
+    try:
+        user_config: WgConfig = await find_config(callback)
+        if not user_config:
+            return
+
+        wg = WgServerTools()
+        await wg.move_user(move="del", server_pubkey=user_config.server_public_key)
+
+        await utils.delete_wg_config(user_config)
+
+    except exc.DatabaseError:
+        await callback.answer(text=text.DB_ERROR, show_alert=True)
+    except exc.WireguardError:
+        await callback.answer(text=text.WG_ERROR, show_alert=True)
+    else:
+        await callback.answer(text="Конфигурация успешно удалена", show_alert=True)
+    finally:
+        await bot.delete_message(callback.from_user.id, callback.message.message_id)
+
+
 @router.callback_query(F.data == "create_conf_text")
 @async_speed_metric
 @bot_except
-async def get_config_text(callback: CallbackQuery):
+async def get_config_text(callback: CallbackQuery, bot: Bot):
     """Отправляет текст конфигурации пользователю.
 
     Args:
@@ -173,6 +239,9 @@ async def get_config_text(callback: CallbackQuery):
     Отправляет текст конфигурации, связанный с пользователем, в формате, удобном для чтения.
     """
     user_config: WgConfig = await find_config(callback)
+    if not user_config:
+        await bot.delete_message(callback.from_user.id, callback.message.message_id)
+        return
 
     config = text.get_config_data(user_config)
 
@@ -183,7 +252,7 @@ async def get_config_text(callback: CallbackQuery):
 @router.callback_query(F.data == "create_conf_file")
 @async_speed_metric
 @bot_except
-async def get_config_file(callback: CallbackQuery):
+async def get_config_file(callback: CallbackQuery, bot: Bot):
     """Отправляет файл конфигурации пользователю.
 
     Args:
@@ -192,6 +261,9 @@ async def get_config_file(callback: CallbackQuery):
     Создает файл конфигурации и отправляет его пользователю в виде документа.
     """
     user_config: WgConfig = await find_config(callback)
+    if not user_config:
+        await bot.delete_message(callback.from_user.id, callback.message.message_id)
+        return
 
     config = text.get_config_data(user_config)
     config_file = await text.create_config_file(config)
@@ -209,7 +281,7 @@ async def get_config_file(callback: CallbackQuery):
 @router.callback_query(F.data == "create_conf_qr")
 @async_speed_metric
 @bot_except
-async def get_config_qr(callback: CallbackQuery):
+async def get_config_qr(callback: CallbackQuery, bot: Bot):
     """Отправляет QR-код конфигурации пользователю.
 
     Args:
@@ -218,6 +290,9 @@ async def get_config_qr(callback: CallbackQuery):
     Создает QR-код конфигурации и отправляет его пользователю в виде изображения.
     """
     user_config: WgConfig = await find_config(callback)
+    if not user_config:
+        await bot.delete_message(callback.from_user.id, callback.message.message_id)
+        return
 
     config = text.get_config_data(user_config)
     config_qr = text.create_config_qr(config)

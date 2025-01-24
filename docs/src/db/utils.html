@@ -32,6 +32,7 @@
             <ul>
                     <li><a href="utils/admin.html">admin</a></li>
                     <li><a href="utils/news.html">news</a></li>
+                    <li><a href="utils/notifications.html">notifications</a></li>
                     <li><a href="utils/redis.html">redis</a></li>
                     <li><a href="utils/reports.html">reports</a></li>
                     <li><a href="utils/save.html">save</a></li>
@@ -92,7 +93,7 @@
 <li>delete_cash_transactions: Удаляет кэшированные транзакции.</li>
 <li>get_user_transactions: Получает транзакции пользователя.</li>
 <li>insert_transaction: Вставляет транзакцию.</li>
-<li>raise_money: Cписывает деньги.</li>
+<li>raise_money: Списывает деньги.</li>
 </ul></li>
 <li><p>Пользователи:</p>
 
@@ -102,9 +103,17 @@
 <li>clear_cash: Очищает кэш пользователя.</li>
 <li>freeze_user: Замораживает пользователя.</li>
 <li>get_user: Получает данные пользователя.</li>
+<li>get_all_userdata: Получает все смежные данные пользователя.</li>
 <li>mute_user: Отключает уведомления пользователя.</li>
 <li>recover_user: Восстанавливает пользователя.</li>
 <li>update_rate_user: Обновляет тариф пользователя.</li>
+</ul></li>
+<li><p>Пользовательские уведомления:</p>
+
+<ul>
+<li>get_notifications: Получить уведомления пользователя</li>
+<li>add_notification: Добавить уведомление</li>
+<li>remove_notification: Удалить уведомление</li>
 </ul></li>
 <li><p>Конфигурации WireGuard:</p>
 
@@ -114,6 +123,7 @@
 <li>get_all_wg_configs: Получает все конфигурации WireGuard.</li>
 <li>get_user_with_configs: Получает пользователя с его конфигурациями.</li>
 <li>get_wg_config: Получает конфигурацию WireGuard по идентификатору.</li>
+<li>delete_wg_config: Удаляет конфигурацию WireGuard из БД.</li>
 </ul></li>
 </ul>
 </div>
@@ -150,7 +160,7 @@
 </span><span id="L-26"><a href="#L-26"><span class="linenos">26</span></a><span class="sd">    - delete_cash_transactions: Удаляет кэшированные транзакции.</span>
 </span><span id="L-27"><a href="#L-27"><span class="linenos">27</span></a><span class="sd">    - get_user_transactions: Получает транзакции пользователя.</span>
 </span><span id="L-28"><a href="#L-28"><span class="linenos">28</span></a><span class="sd">    - insert_transaction: Вставляет транзакцию.</span>
-</span><span id="L-29"><a href="#L-29"><span class="linenos">29</span></a><span class="sd">    - raise_money: Cписывает деньги.</span>
+</span><span id="L-29"><a href="#L-29"><span class="linenos">29</span></a><span class="sd">    - raise_money: Списывает деньги.</span>
 </span><span id="L-30"><a href="#L-30"><span class="linenos">30</span></a>
 </span><span id="L-31"><a href="#L-31"><span class="linenos">31</span></a><span class="sd">- Пользователи:</span>
 </span><span id="L-32"><a href="#L-32"><span class="linenos">32</span></a><span class="sd">    - add_user: Добавляет нового пользователя.</span>
@@ -158,32 +168,43 @@
 </span><span id="L-34"><a href="#L-34"><span class="linenos">34</span></a><span class="sd">    - clear_cash: Очищает кэш пользователя.</span>
 </span><span id="L-35"><a href="#L-35"><span class="linenos">35</span></a><span class="sd">    - freeze_user: Замораживает пользователя.</span>
 </span><span id="L-36"><a href="#L-36"><span class="linenos">36</span></a><span class="sd">    - get_user: Получает данные пользователя.</span>
-</span><span id="L-37"><a href="#L-37"><span class="linenos">37</span></a><span class="sd">    - mute_user: Отключает уведомления пользователя.</span>
-</span><span id="L-38"><a href="#L-38"><span class="linenos">38</span></a><span class="sd">    - recover_user: Восстанавливает пользователя.</span>
-</span><span id="L-39"><a href="#L-39"><span class="linenos">39</span></a><span class="sd">    - update_rate_user: Обновляет тариф пользователя.</span>
-</span><span id="L-40"><a href="#L-40"><span class="linenos">40</span></a>
-</span><span id="L-41"><a href="#L-41"><span class="linenos">41</span></a><span class="sd">- Конфигурации WireGuard:</span>
-</span><span id="L-42"><a href="#L-42"><span class="linenos">42</span></a><span class="sd">    - add_wg_config: Добавляет конфигурацию WireGuard.</span>
-</span><span id="L-43"><a href="#L-43"><span class="linenos">43</span></a><span class="sd">    - freeze_config: Замораживает конфигурацию WireGuard.</span>
-</span><span id="L-44"><a href="#L-44"><span class="linenos">44</span></a><span class="sd">    - get_all_wg_configs: Получает все конфигурации WireGuard.</span>
-</span><span id="L-45"><a href="#L-45"><span class="linenos">45</span></a><span class="sd">    - get_user_with_configs: Получает пользователя с его конфигурациями.</span>
-</span><span id="L-46"><a href="#L-46"><span class="linenos">46</span></a><span class="sd">    - get_wg_config: Получает конфигурацию WireGuard по идентификатору.</span>
-</span><span id="L-47"><a href="#L-47"><span class="linenos">47</span></a><span class="sd">&quot;&quot;&quot;</span>
-</span><span id="L-48"><a href="#L-48"><span class="linenos">48</span></a>
-</span><span id="L-49"><a href="#L-49"><span class="linenos">49</span></a><span class="kn">from</span> <span class="nn">db.utils.admin</span> <span class="kn">import</span> <span class="p">(</span><span class="n">get_admins</span><span class="p">,</span> <span class="n">get_all_users</span><span class="p">,</span> <span class="n">get_valid_users</span><span class="p">,</span>
-</span><span id="L-50"><a href="#L-50"><span class="linenos">50</span></a>                            <span class="n">set_admin</span><span class="p">)</span>
-</span><span id="L-51"><a href="#L-51"><span class="linenos">51</span></a><span class="kn">from</span> <span class="nn">db.utils.news</span> <span class="kn">import</span> <span class="n">add_news</span>
-</span><span id="L-52"><a href="#L-52"><span class="linenos">52</span></a><span class="kn">from</span> <span class="nn">db.utils.reports</span> <span class="kn">import</span> <span class="n">add_report</span>
-</span><span id="L-53"><a href="#L-53"><span class="linenos">53</span></a><span class="kn">from</span> <span class="nn">db.utils.save</span> <span class="kn">import</span> <span class="n">async_backup</span><span class="p">,</span> <span class="n">dump</span>
-</span><span id="L-54"><a href="#L-54"><span class="linenos">54</span></a><span class="kn">from</span> <span class="nn">db.utils.tests</span> <span class="kn">import</span> <span class="n">test_server_speed</span>
-</span><span id="L-55"><a href="#L-55"><span class="linenos">55</span></a><span class="kn">from</span> <span class="nn">db.utils.transactions</span> <span class="kn">import</span> <span class="p">(</span><span class="n">close_free_trial</span><span class="p">,</span> <span class="n">confirm_success_pay</span><span class="p">,</span>
-</span><span id="L-56"><a href="#L-56"><span class="linenos">56</span></a>                                   <span class="n">delete_cash_transactions</span><span class="p">,</span>
-</span><span id="L-57"><a href="#L-57"><span class="linenos">57</span></a>                                   <span class="n">get_user_transactions</span><span class="p">,</span> <span class="n">insert_transaction</span><span class="p">,</span>
-</span><span id="L-58"><a href="#L-58"><span class="linenos">58</span></a>                                   <span class="n">raise_money</span><span class="p">)</span>
-</span><span id="L-59"><a href="#L-59"><span class="linenos">59</span></a><span class="kn">from</span> <span class="nn">db.utils.user</span> <span class="kn">import</span> <span class="p">(</span><span class="n">add_user</span><span class="p">,</span> <span class="n">ban_user</span><span class="p">,</span> <span class="n">clear_cash</span><span class="p">,</span> <span class="n">freeze_user</span><span class="p">,</span>
-</span><span id="L-60"><a href="#L-60"><span class="linenos">60</span></a>                           <span class="n">get_user</span><span class="p">,</span> <span class="n">mute_user</span><span class="p">,</span> <span class="n">recover_user</span><span class="p">,</span> <span class="n">update_rate_user</span><span class="p">)</span>
-</span><span id="L-61"><a href="#L-61"><span class="linenos">61</span></a><span class="kn">from</span> <span class="nn">db.utils.wg</span> <span class="kn">import</span> <span class="p">(</span><span class="n">add_wg_config</span><span class="p">,</span> <span class="n">freeze_config</span><span class="p">,</span> <span class="n">get_all_wg_configs</span><span class="p">,</span>
-</span><span id="L-62"><a href="#L-62"><span class="linenos">62</span></a>                         <span class="n">get_user_with_configs</span><span class="p">,</span> <span class="n">get_wg_config</span><span class="p">)</span>
+</span><span id="L-37"><a href="#L-37"><span class="linenos">37</span></a><span class="sd">    - get_all_userdata: Получает все смежные данные пользователя.</span>
+</span><span id="L-38"><a href="#L-38"><span class="linenos">38</span></a><span class="sd">    - mute_user: Отключает уведомления пользователя.</span>
+</span><span id="L-39"><a href="#L-39"><span class="linenos">39</span></a><span class="sd">    - recover_user: Восстанавливает пользователя.</span>
+</span><span id="L-40"><a href="#L-40"><span class="linenos">40</span></a><span class="sd">    - update_rate_user: Обновляет тариф пользователя.</span>
+</span><span id="L-41"><a href="#L-41"><span class="linenos">41</span></a>
+</span><span id="L-42"><a href="#L-42"><span class="linenos">42</span></a><span class="sd">- Пользовательские уведомления:</span>
+</span><span id="L-43"><a href="#L-43"><span class="linenos">43</span></a><span class="sd">    - get_notifications: Получить уведомления пользователя</span>
+</span><span id="L-44"><a href="#L-44"><span class="linenos">44</span></a><span class="sd">    - add_notification: Добавить уведомление</span>
+</span><span id="L-45"><a href="#L-45"><span class="linenos">45</span></a><span class="sd">    - remove_notification: Удалить уведомление</span>
+</span><span id="L-46"><a href="#L-46"><span class="linenos">46</span></a>
+</span><span id="L-47"><a href="#L-47"><span class="linenos">47</span></a><span class="sd">- Конфигурации WireGuard:</span>
+</span><span id="L-48"><a href="#L-48"><span class="linenos">48</span></a><span class="sd">    - add_wg_config: Добавляет конфигурацию WireGuard.</span>
+</span><span id="L-49"><a href="#L-49"><span class="linenos">49</span></a><span class="sd">    - freeze_config: Замораживает конфигурацию WireGuard.</span>
+</span><span id="L-50"><a href="#L-50"><span class="linenos">50</span></a><span class="sd">    - get_all_wg_configs: Получает все конфигурации WireGuard.</span>
+</span><span id="L-51"><a href="#L-51"><span class="linenos">51</span></a><span class="sd">    - get_user_with_configs: Получает пользователя с его конфигурациями.</span>
+</span><span id="L-52"><a href="#L-52"><span class="linenos">52</span></a><span class="sd">    - get_wg_config: Получает конфигурацию WireGuard по идентификатору.</span>
+</span><span id="L-53"><a href="#L-53"><span class="linenos">53</span></a><span class="sd">    - delete_wg_config: Удаляет конфигурацию WireGuard из БД.</span>
+</span><span id="L-54"><a href="#L-54"><span class="linenos">54</span></a><span class="sd">&quot;&quot;&quot;</span>
+</span><span id="L-55"><a href="#L-55"><span class="linenos">55</span></a>
+</span><span id="L-56"><a href="#L-56"><span class="linenos">56</span></a><span class="kn">from</span> <span class="nn">db.utils.admin</span> <span class="kn">import</span> <span class="p">(</span><span class="n">get_admins</span><span class="p">,</span> <span class="n">get_all_users</span><span class="p">,</span> <span class="n">get_valid_users</span><span class="p">,</span>
+</span><span id="L-57"><a href="#L-57"><span class="linenos">57</span></a>                            <span class="n">set_admin</span><span class="p">)</span>
+</span><span id="L-58"><a href="#L-58"><span class="linenos">58</span></a><span class="kn">from</span> <span class="nn">db.utils.news</span> <span class="kn">import</span> <span class="n">add_news</span>
+</span><span id="L-59"><a href="#L-59"><span class="linenos">59</span></a><span class="kn">from</span> <span class="nn">db.utils.notifications</span> <span class="kn">import</span> <span class="p">(</span><span class="n">add_notification</span><span class="p">,</span> <span class="n">get_notifications</span><span class="p">,</span>
+</span><span id="L-60"><a href="#L-60"><span class="linenos">60</span></a>                                    <span class="n">remove_notification</span><span class="p">)</span>
+</span><span id="L-61"><a href="#L-61"><span class="linenos">61</span></a><span class="kn">from</span> <span class="nn">db.utils.reports</span> <span class="kn">import</span> <span class="n">add_report</span>
+</span><span id="L-62"><a href="#L-62"><span class="linenos">62</span></a><span class="kn">from</span> <span class="nn">db.utils.save</span> <span class="kn">import</span> <span class="n">async_backup</span><span class="p">,</span> <span class="n">dump</span>
+</span><span id="L-63"><a href="#L-63"><span class="linenos">63</span></a><span class="kn">from</span> <span class="nn">db.utils.tests</span> <span class="kn">import</span> <span class="n">test_server_speed</span>
+</span><span id="L-64"><a href="#L-64"><span class="linenos">64</span></a><span class="kn">from</span> <span class="nn">db.utils.transactions</span> <span class="kn">import</span> <span class="p">(</span><span class="n">close_free_trial</span><span class="p">,</span> <span class="n">confirm_success_pay</span><span class="p">,</span>
+</span><span id="L-65"><a href="#L-65"><span class="linenos">65</span></a>                                   <span class="n">delete_cash_transactions</span><span class="p">,</span>
+</span><span id="L-66"><a href="#L-66"><span class="linenos">66</span></a>                                   <span class="n">get_user_transactions</span><span class="p">,</span> <span class="n">insert_transaction</span><span class="p">,</span>
+</span><span id="L-67"><a href="#L-67"><span class="linenos">67</span></a>                                   <span class="n">raise_money</span><span class="p">)</span>
+</span><span id="L-68"><a href="#L-68"><span class="linenos">68</span></a><span class="kn">from</span> <span class="nn">db.utils.user</span> <span class="kn">import</span> <span class="p">(</span><span class="n">add_user</span><span class="p">,</span> <span class="n">ban_user</span><span class="p">,</span> <span class="n">clear_cash</span><span class="p">,</span> <span class="n">freeze_user</span><span class="p">,</span>
+</span><span id="L-69"><a href="#L-69"><span class="linenos">69</span></a>                           <span class="n">get_all_userdata</span><span class="p">,</span> <span class="n">get_user</span><span class="p">,</span> <span class="n">mute_user</span><span class="p">,</span> <span class="n">recover_user</span><span class="p">,</span>
+</span><span id="L-70"><a href="#L-70"><span class="linenos">70</span></a>                           <span class="n">update_rate_user</span><span class="p">)</span>
+</span><span id="L-71"><a href="#L-71"><span class="linenos">71</span></a><span class="kn">from</span> <span class="nn">db.utils.wg</span> <span class="kn">import</span> <span class="p">(</span><span class="n">add_wg_config</span><span class="p">,</span> <span class="n">delete_wg_config</span><span class="p">,</span> <span class="n">freeze_config</span><span class="p">,</span>
+</span><span id="L-72"><a href="#L-72"><span class="linenos">72</span></a>                         <span class="n">get_all_wg_configs</span><span class="p">,</span> <span class="n">get_user_with_configs</span><span class="p">,</span>
+</span><span id="L-73"><a href="#L-73"><span class="linenos">73</span></a>                         <span class="n">get_wg_config</span><span class="p">)</span>
 </span></pre></div>
 
 

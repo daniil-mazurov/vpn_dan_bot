@@ -26,3 +26,5 @@ server/html/*
 server/static/archive/*
 server/templates/dev/*
 id_rsa_wg
+src/scheduler/timepoint/last_decremented.pickle
+src/scheduler/timepoint/last_noticed.pickle

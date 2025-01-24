@@ -38,7 +38,7 @@ class WgServerTools:
         Устанавливает значения для приватного и публичного ключей, а также счетчика пиров.
         """
         self.private_key: str = None
-        self.public_key: str = None
+        self.server_public_key: str = None
         self.countpeers: int = None
 
     async def create_peer(self, conn: SSHClientConnection):
@@ -65,7 +65,7 @@ class WgServerTools:
             )
             completed_proc = await conn.run("\n" + "\n".join(cmd), check=True)
             keys = completed_proc.stdout.strip("\n").split("\n")
-            self.private_key, self.public_key, self.countpeers, *_ = keys
+            self.private_key, self.server_public_key, self.countpeers, *_ = keys
             logger.info(completed_proc.stderr)
 
         except (OSError, asyncssh.Error) as e:
@@ -74,23 +74,21 @@ class WgServerTools:
             )
             raise WireguardError from e
 
-    async def ban_peer(self, conn: SSHClientConnection, reverse=False):
+    async def change_peer(
+        self, conn: SSHClientConnection, cmd: Literal["ban", "unban", "del"]
+    ):
         """Блокирует или разблокирует пира на сервере WireGuard.
 
         Args:
             conn (SSHClientConnection): Установленное SSH-соединение с сервером.
-            reverse (bool): Если True, разблокирует пира, иначе блокирует.
+            cmd (Literal["ban", "unban", "del"]): Команда для изменения состояния пира.
 
         Raises:
             WireguardError: Если возникла ошибка при изменении состояния пира.
         """
-        if reverse:
-            ban = "unban"
-        else:
-            ban = "ban"
 
         try:
-            cmd = f"echo {escape(settings.WG_PASS.get_secret_value())} | sudo -S ~/Scripts/pywg.py -m {ban} {self.public_key} --raises"
+            cmd = f"echo {escape(settings.WG_PASS.get_secret_value())} | sudo -S ~/Scripts/pywg.py -m {cmd} {self.server_public_key} --raises"
             completed_proc = await conn.run(f"\n{cmd}", check=True)
             logger.info(completed_proc.stderr)
 
@@ -111,7 +109,7 @@ class WgServerTools:
             user_id=user_id,
             user_private_key=self.private_key,
             address=f"{self.countpeers}/32",
-            server_public_key=self.public_key,
+            server_public_key=self.server_public_key,
         )
         return self.user_config
 
@@ -146,16 +144,16 @@ class WgServerTools:
     @validate_call
     async def move_user(
         self,
-        move: Literal["add", "ban", "unban"],
+        move: Literal["add", "ban", "unban", "del"],
         user_id: int = None,
-        user_pubkey: str = None,
+        server_pubkey: str = None,
     ):
         """Добавляет, блокирует или разблокирует пира.
 
         Args:
-            move (Literal["add", "ban", "unban"]): Действие для выполнения.
+            move (Literal["add", "ban", "unban", "del"]): Действие для выполнения.
             user_id (int, optional): Идентификатор пользователя.
-            user_pubkey (str, optional): Публичный ключ пользователя.
+            server_pubkey (str, optional): Публичный ключ пользователя на сервере.
 
         Returns:
             dict: Конфигурация пользователя, если действие - добавление.
@@ -171,12 +169,9 @@ class WgServerTools:
                 usr_cfg = self.create_db_wg_model(user_id)
                 logger.info(f"{usr_cfg['address']=}")
                 return usr_cfg
-            case "ban":
-                self.public_key = user_pubkey
-                await self.ban_peer(conn)
-            case "unban":
-                self.public_key = user_pubkey
-                await self.ban_peer(conn, reverse=True)
+            case "ban" | "unban" | "del":
+                self.server_public_key = server_pubkey
+                await self.change_peer(conn, cmd=move)
 
     async def get_peer_list(self):
         """Получает список пиров на сервере WireGuard.

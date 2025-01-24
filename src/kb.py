@@ -1,7 +1,11 @@
 """Все кнопки и клавиатуры для хендлеров"""
 
-from aiogram.types import (InlineKeyboardButton, InlineKeyboardMarkup,
-                           KeyboardButton, ReplyKeyboardMarkup)
+from aiogram.types import (
+    InlineKeyboardButton,
+    InlineKeyboardMarkup,
+    KeyboardButton,
+    ReplyKeyboardMarkup,
+)
 from pytils.numeral import get_plural
 
 from core.config import settings
@@ -378,6 +382,7 @@ def get_config_keyboard():
             InlineKeyboardButton(text="TEXT", callback_data="create_conf_text"),
             InlineKeyboardButton(text="QR", callback_data="create_conf_qr"),
             InlineKeyboardButton(text="FILE", callback_data="create_conf_file"),
+            InlineKeyboardButton(text="🚮", callback_data="remove_config_confirm"),
         ]
     )
     buttons.append(
@@ -554,3 +559,14 @@ def get_chat_button(url):
             ]
         ]
     )
+
+
+def remove_config():
+    buttons = [
+        [
+            InlineKeyboardButton(text="Удалить", callback_data="remove_config"),
+            InlineKeyboardButton(text="Отмена", callback_data="remove_config_cancel"),
+        ]
+    ]
+    keyboard = InlineKeyboardMarkup(inline_keyboard=buttons)
+    return keyboard

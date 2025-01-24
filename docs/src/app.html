@@ -281,7 +281,7 @@
 </span><span id="L-205"><a href="#L-205"><span class="linenos">205</span></a><span class="sd">        AssertionError: Если ответ от подсервера не соответствует ожиданиям.</span>
 </span><span id="L-206"><a href="#L-206"><span class="linenos">206</span></a><span class="sd">    &quot;&quot;&quot;</span>
 </span><span id="L-207"><a href="#L-207"><span class="linenos">207</span></a>    <span class="k">async</span> <span class="k">with</span> <span class="n">ClientSession</span><span class="p">()</span> <span class="k">as</span> <span class="n">session</span><span class="p">:</span>
-</span><span id="L-208"><a href="#L-208"><span class="linenos">208</span></a>        <span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;http://assa.ddns.net/test&quot;</span>
+</span><span id="L-208"><a href="#L-208"><span class="linenos">208</span></a>        <span class="n">url</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">settings</span><span class="o">.</span><span class="n">subserver_url</span><span class="si">}</span><span class="s2">test&quot;</span>
 </span><span id="L-209"><a href="#L-209"><span class="linenos">209</span></a>        <span class="c1"># url = &quot;http://127.0.0.1:5000/test&quot;</span>
 </span><span id="L-210"><a href="#L-210"><span class="linenos">210</span></a>        <span class="n">params</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;test&quot;</span><span class="p">}</span>
 </span><span id="L-211"><a href="#L-211"><span class="linenos">211</span></a>
@@ -293,7 +293,7 @@
 </span><span id="L-217"><a href="#L-217"><span class="linenos">217</span></a><span class="k">async</span> <span class="k">def</span> <span class="nf">start_bot</span><span class="p">():</span>
 </span><span id="L-218"><a href="#L-218"><span class="linenos">218</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Запускает бота и его службы.</span>
 </span><span id="L-219"><a href="#L-219"><span class="linenos">219</span></a>
-</span><span id="L-220"><a href="#L-220"><span class="linenos">220</span></a><span class="sd">    Эта функция инициализирует подключение по SSH к wireguard серверу, </span>
+</span><span id="L-220"><a href="#L-220"><span class="linenos">220</span></a><span class="sd">    Эта функция инициализирует подключение по SSH к wireguard серверу,</span>
 </span><span id="L-221"><a href="#L-221"><span class="linenos">221</span></a><span class="sd">    создает бота, диспетчер и планировщик, а затем запускает все службы.</span>
 </span><span id="L-222"><a href="#L-222"><span class="linenos">222</span></a>
 </span><span id="L-223"><a href="#L-223"><span class="linenos">223</span></a><span class="sd">    Returns:</span>
@@ -645,7 +645,7 @@
 </span><span id="test_subserver-206"><a href="#test_subserver-206"><span class="linenos">206</span></a><span class="sd">        AssertionError: Если ответ от подсервера не соответствует ожиданиям.</span>
 </span><span id="test_subserver-207"><a href="#test_subserver-207"><span class="linenos">207</span></a><span class="sd">    &quot;&quot;&quot;</span>
 </span><span id="test_subserver-208"><a href="#test_subserver-208"><span class="linenos">208</span></a>    <span class="k">async</span> <span class="k">with</span> <span class="n">ClientSession</span><span class="p">()</span> <span class="k">as</span> <span class="n">session</span><span class="p">:</span>
-</span><span id="test_subserver-209"><a href="#test_subserver-209"><span class="linenos">209</span></a>        <span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;http://assa.ddns.net/test&quot;</span>
+</span><span id="test_subserver-209"><a href="#test_subserver-209"><span class="linenos">209</span></a>        <span class="n">url</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">settings</span><span class="o">.</span><span class="n">subserver_url</span><span class="si">}</span><span class="s2">test&quot;</span>
 </span><span id="test_subserver-210"><a href="#test_subserver-210"><span class="linenos">210</span></a>        <span class="c1"># url = &quot;http://127.0.0.1:5000/test&quot;</span>
 </span><span id="test_subserver-211"><a href="#test_subserver-211"><span class="linenos">211</span></a>        <span class="n">params</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;test&quot;</span><span class="p">}</span>
 </span><span id="test_subserver-212"><a href="#test_subserver-212"><span class="linenos">212</span></a>
@@ -683,7 +683,7 @@
             <div class="pdoc-code codehilite"><pre><span></span><span id="start_bot-218"><a href="#start_bot-218"><span class="linenos">218</span></a><span class="k">async</span> <span class="k">def</span> <span class="nf">start_bot</span><span class="p">():</span>
 </span><span id="start_bot-219"><a href="#start_bot-219"><span class="linenos">219</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Запускает бота и его службы.</span>
 </span><span id="start_bot-220"><a href="#start_bot-220"><span class="linenos">220</span></a>
-</span><span id="start_bot-221"><a href="#start_bot-221"><span class="linenos">221</span></a><span class="sd">    Эта функция инициализирует подключение по SSH к wireguard серверу, </span>
+</span><span id="start_bot-221"><a href="#start_bot-221"><span class="linenos">221</span></a><span class="sd">    Эта функция инициализирует подключение по SSH к wireguard серверу,</span>
 </span><span id="start_bot-222"><a href="#start_bot-222"><span class="linenos">222</span></a><span class="sd">    создает бота, диспетчер и планировщик, а затем запускает все службы.</span>
 </span><span id="start_bot-223"><a href="#start_bot-223"><span class="linenos">223</span></a>
 </span><span id="start_bot-224"><a href="#start_bot-224"><span class="linenos">224</span></a><span class="sd">    Returns:</span>
@@ -698,7 +698,7 @@
 
             <div class="docstring"><p>Запускает бота и его службы.</p>
 
-<p>Эта функция инициализирует подключение по SSH к wireguard серверу, 
+<p>Эта функция инициализирует подключение по SSH к wireguard серверу,
 создает бота, диспетчер и планировщик, а затем запускает все службы.</p>
 
 <h6 id="returns">Returns:</h6>

@@ -10,6 +10,7 @@ WORKDIR /vpn_dan_bot
 COPY src src/
 COPY server server/
 COPY pyproject.toml poetry.lock _main.py _serv.py .env log.ini id_rsa_wg ./
+RUN mkdir tmp
 # RUN mkdir bugs logs && touch logs/queue.log
 
 RUN pip install poetry && poetry config virtualenvs.in-project true && poetry install --no-root

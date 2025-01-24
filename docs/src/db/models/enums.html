@@ -88,6 +88,24 @@
                 </ul>
 
             </li>
+            <li>
+                    <a class="class" href="#NotificationType">NotificationType</a>
+                            <ul class="memberlist">
+                        <li>
+                                <a class="variable" href="#NotificationType.success">success</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#NotificationType.error">error</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#NotificationType.warning">warning</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#NotificationType.info">info</a>
+                        </li>
+                </ul>
+
+            </li>
     </ul>
 
 
@@ -176,6 +194,27 @@
 </span><span id="L-64"><a href="#L-64"><span class="linenos">64</span></a><span class="sd">            str: Строковое представление статуса отчета.</span>
 </span><span id="L-65"><a href="#L-65"><span class="linenos">65</span></a><span class="sd">        &quot;&quot;&quot;</span>
 </span><span id="L-66"><a href="#L-66"><span class="linenos">66</span></a>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span>
+</span><span id="L-67"><a href="#L-67"><span class="linenos">67</span></a>
+</span><span id="L-68"><a href="#L-68"><span class="linenos">68</span></a>
+</span><span id="L-69"><a href="#L-69"><span class="linenos">69</span></a><span class="k">class</span> <span class="nc">NotificationType</span><span class="p">(</span><span class="n">enum</span><span class="o">.</span><span class="n">Enum</span><span class="p">):</span>
+</span><span id="L-70"><a href="#L-70"><span class="linenos">70</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Тип уведомления&quot;&quot;&quot;</span>
+</span><span id="L-71"><a href="#L-71"><span class="linenos">71</span></a>
+</span><span id="L-72"><a href="#L-72"><span class="linenos">72</span></a>    <span class="n">success</span> <span class="o">=</span> <span class="s2">&quot;success&quot;</span>
+</span><span id="L-73"><a href="#L-73"><span class="linenos">73</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Уведомление об успешной операции&quot;&quot;&quot;</span>
+</span><span id="L-74"><a href="#L-74"><span class="linenos">74</span></a>    <span class="n">error</span> <span class="o">=</span> <span class="s2">&quot;error&quot;</span>
+</span><span id="L-75"><a href="#L-75"><span class="linenos">75</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Уведомление об ошибочной операции&quot;&quot;&quot;</span>
+</span><span id="L-76"><a href="#L-76"><span class="linenos">76</span></a>    <span class="n">warning</span> <span class="o">=</span> <span class="s2">&quot;warning&quot;</span>
+</span><span id="L-77"><a href="#L-77"><span class="linenos">77</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Важно уведомление&quot;&quot;&quot;</span>
+</span><span id="L-78"><a href="#L-78"><span class="linenos">78</span></a>    <span class="n">info</span> <span class="o">=</span> <span class="s2">&quot;info&quot;</span>
+</span><span id="L-79"><a href="#L-79"><span class="linenos">79</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Информация для пользователя&quot;&quot;&quot;</span>
+</span><span id="L-80"><a href="#L-80"><span class="linenos">80</span></a>
+</span><span id="L-81"><a href="#L-81"><span class="linenos">81</span></a>    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+</span><span id="L-82"><a href="#L-82"><span class="linenos">82</span></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;Возвращает строковое представление типа уведомления.</span>
+</span><span id="L-83"><a href="#L-83"><span class="linenos">83</span></a>
+</span><span id="L-84"><a href="#L-84"><span class="linenos">84</span></a><span class="sd">        Returns:</span>
+</span><span id="L-85"><a href="#L-85"><span class="linenos">85</span></a><span class="sd">            str: Строковое представление типа уведомления.</span>
+</span><span id="L-86"><a href="#L-86"><span class="linenos">86</span></a><span class="sd">        &quot;&quot;&quot;</span>
+</span><span id="L-87"><a href="#L-87"><span class="linenos">87</span></a>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span>
 </span></pre></div>
 
 
@@ -473,6 +512,100 @@
     <a class="headerlink" href="#ReportStatus.cancelled"></a>
     
             <div class="docstring"><p>Обращение отменено</p>
+</div>
+
+
+                            </div>
+                </section>
+                <section id="NotificationType">
+                            <input id="NotificationType-view-source" class="view-source-toggle-state" type="checkbox" aria-hidden="true" tabindex="-1">
+<div class="attr class">
+            
+    <span class="def">class</span>
+    <span class="name">NotificationType</span><wbr>(<span class="base">enum.Enum</span>):
+
+                <label class="view-source-button" for="NotificationType-view-source"><span>View Source</span></label>
+
+    </div>
+    <a class="headerlink" href="#NotificationType"></a>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="NotificationType-70"><a href="#NotificationType-70"><span class="linenos">70</span></a><span class="k">class</span> <span class="nc">NotificationType</span><span class="p">(</span><span class="n">enum</span><span class="o">.</span><span class="n">Enum</span><span class="p">):</span>
+</span><span id="NotificationType-71"><a href="#NotificationType-71"><span class="linenos">71</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Тип уведомления&quot;&quot;&quot;</span>
+</span><span id="NotificationType-72"><a href="#NotificationType-72"><span class="linenos">72</span></a>
+</span><span id="NotificationType-73"><a href="#NotificationType-73"><span class="linenos">73</span></a>    <span class="n">success</span> <span class="o">=</span> <span class="s2">&quot;success&quot;</span>
+</span><span id="NotificationType-74"><a href="#NotificationType-74"><span class="linenos">74</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Уведомление об успешной операции&quot;&quot;&quot;</span>
+</span><span id="NotificationType-75"><a href="#NotificationType-75"><span class="linenos">75</span></a>    <span class="n">error</span> <span class="o">=</span> <span class="s2">&quot;error&quot;</span>
+</span><span id="NotificationType-76"><a href="#NotificationType-76"><span class="linenos">76</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Уведомление об ошибочной операции&quot;&quot;&quot;</span>
+</span><span id="NotificationType-77"><a href="#NotificationType-77"><span class="linenos">77</span></a>    <span class="n">warning</span> <span class="o">=</span> <span class="s2">&quot;warning&quot;</span>
+</span><span id="NotificationType-78"><a href="#NotificationType-78"><span class="linenos">78</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Важно уведомление&quot;&quot;&quot;</span>
+</span><span id="NotificationType-79"><a href="#NotificationType-79"><span class="linenos">79</span></a>    <span class="n">info</span> <span class="o">=</span> <span class="s2">&quot;info&quot;</span>
+</span><span id="NotificationType-80"><a href="#NotificationType-80"><span class="linenos">80</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Информация для пользователя&quot;&quot;&quot;</span>
+</span><span id="NotificationType-81"><a href="#NotificationType-81"><span class="linenos">81</span></a>
+</span><span id="NotificationType-82"><a href="#NotificationType-82"><span class="linenos">82</span></a>    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+</span><span id="NotificationType-83"><a href="#NotificationType-83"><span class="linenos">83</span></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;Возвращает строковое представление типа уведомления.</span>
+</span><span id="NotificationType-84"><a href="#NotificationType-84"><span class="linenos">84</span></a>
+</span><span id="NotificationType-85"><a href="#NotificationType-85"><span class="linenos">85</span></a><span class="sd">        Returns:</span>
+</span><span id="NotificationType-86"><a href="#NotificationType-86"><span class="linenos">86</span></a><span class="sd">            str: Строковое представление типа уведомления.</span>
+</span><span id="NotificationType-87"><a href="#NotificationType-87"><span class="linenos">87</span></a><span class="sd">        &quot;&quot;&quot;</span>
+</span><span id="NotificationType-88"><a href="#NotificationType-88"><span class="linenos">88</span></a>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span>
+</span></pre></div>
+
+
+            <div class="docstring"><p>Тип уведомления</p>
+</div>
+
+
+                            <div id="NotificationType.success" class="classattr">
+                                <div class="attr variable">
+            <span class="name">success</span>        =
+<span class="default_value">&lt;<a href="#NotificationType.success">NotificationType.success</a>: &#39;success&#39;&gt;</span>
+
+        
+    </div>
+    <a class="headerlink" href="#NotificationType.success"></a>
+    
+            <div class="docstring"><p>Уведомление об успешной операции</p>
+</div>
+
+
+                            </div>
+                            <div id="NotificationType.error" class="classattr">
+                                <div class="attr variable">
+            <span class="name">error</span>        =
+<span class="default_value">&lt;<a href="#NotificationType.error">NotificationType.error</a>: &#39;error&#39;&gt;</span>
+
+        
+    </div>
+    <a class="headerlink" href="#NotificationType.error"></a>
+    
+            <div class="docstring"><p>Уведомление об ошибочной операции</p>
+</div>
+
+
+                            </div>
+                            <div id="NotificationType.warning" class="classattr">
+                                <div class="attr variable">
+            <span class="name">warning</span>        =
+<span class="default_value">&lt;<a href="#NotificationType.warning">NotificationType.warning</a>: &#39;warning&#39;&gt;</span>
+
+        
+    </div>
+    <a class="headerlink" href="#NotificationType.warning"></a>
+    
+            <div class="docstring"><p>Важно уведомление</p>
+</div>
+
+
+                            </div>
+                            <div id="NotificationType.info" class="classattr">
+                                <div class="attr variable">
+            <span class="name">info</span>        =
+<span class="default_value">&lt;<a href="#NotificationType.info">NotificationType.info</a>: &#39;info&#39;&gt;</span>
+
+        
+    </div>
+    <a class="headerlink" href="#NotificationType.info"></a>
+    
+            <div class="docstring"><p>Информация для пользователя</p>
 </div>
 
 

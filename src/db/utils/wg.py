@@ -2,7 +2,7 @@
 
 import logging
 
-from sqlalchemy import and_, insert, select, update
+from sqlalchemy import and_, delete, insert, select, update
 from sqlalchemy.orm import joinedload
 
 from core.exceptions import DatabaseError, UniquenessError
@@ -137,6 +137,22 @@ async def add_wg_config(conf: dict, user_id):
         raise DatabaseError
 
     return result
+
+
+@async_speed_metric
+async def delete_wg_config(config: WgConfig):
+    """Удаляет конфигурацию WireGuard.
+
+    Args:
+        config (WgConfig): Конфигурация WireGuard.
+
+    Raises:
+        DatabaseError: Если конфигурацию не удалось удалить из-за ошибки базы данных.
+    """
+    query = delete(WgConfig).where(WgConfig.id == config.id)
+    await execute_query(query)
+
+    await delete_cash_configs(config.user_id)
 
 
 @async_speed_metric

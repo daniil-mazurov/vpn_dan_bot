@@ -50,6 +50,7 @@
     - get_all_wg_configs: Получает все конфигурации WireGuard.
     - get_user_with_configs: Получает пользователя с его конфигурациями.
     - get_wg_config: Получает конфигурацию WireGuard по идентификатору.
+    - delete_wg_config: Удаляет конфигурацию WireGuard из БД.
 """
 
 from db.utils.admin import (get_admins, get_all_users, get_valid_users,
@@ -67,5 +68,6 @@ from db.utils.transactions import (close_free_trial, confirm_success_pay,
 from db.utils.user import (add_user, ban_user, clear_cash, freeze_user,
                            get_all_userdata, get_user, mute_user, recover_user,
                            update_rate_user)
-from db.utils.wg import (add_wg_config, freeze_config, get_all_wg_configs,
-                         get_user_with_configs, get_wg_config)
+from db.utils.wg import (add_wg_config, delete_wg_config, freeze_config,
+                         get_all_wg_configs, get_user_with_configs,
+                         get_wg_config)

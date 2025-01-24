@@ -68,7 +68,7 @@
 </span><span id="L-5"><a href="#L-5"><span class="linenos"> 5</span></a><span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
 </span><span id="L-6"><a href="#L-6"><span class="linenos"> 6</span></a>
 </span><span id="L-7"><a href="#L-7"><span class="linenos"> 7</span></a><span class="kn">from</span> <span class="nn">core.config</span> <span class="kn">import</span> <span class="n">settings</span>
-</span><span id="L-8"><a href="#L-8"><span class="linenos"> 8</span></a><span class="kn">from</span> <span class="nn">core.exceptions</span> <span class="kn">import</span> <span class="n">DumpError</span>
+</span><span id="L-8"><a href="#L-8"><span class="linenos"> 8</span></a><span class="kn">from</span> <span class="nn">core.err</span> <span class="kn">import</span> <span class="n">log_cash_error</span>
 </span><span id="L-9"><a href="#L-9"><span class="linenos"> 9</span></a><span class="kn">from</span> <span class="nn">core.path</span> <span class="kn">import</span> <span class="n">PATH</span>
 </span><span id="L-10"><a href="#L-10"><span class="linenos">10</span></a><span class="kn">from</span> <span class="nn">db.utils</span> <span class="kn">import</span> <span class="n">dump</span>
 </span><span id="L-11"><a href="#L-11"><span class="linenos">11</span></a>
@@ -107,8 +107,9 @@
 </span><span id="L-44"><a href="#L-44"><span class="linenos">44</span></a>            <span class="k">for</span> <span class="n">_dump</span> <span class="ow">in</span> <span class="n">dumps</span><span class="p">[:</span> <span class="nb">len</span><span class="p">(</span><span class="n">dumps</span><span class="p">)</span> <span class="o">-</span> <span class="n">settings</span><span class="o">.</span><span class="n">max_dumps</span><span class="p">]:</span>
 </span><span id="L-45"><a href="#L-45"><span class="linenos">45</span></a>                <span class="n">_dump</span><span class="o">.</span><span class="n">unlink</span><span class="p">()</span>
 </span><span id="L-46"><a href="#L-46"><span class="linenos">46</span></a>
-</span><span id="L-47"><a href="#L-47"><span class="linenos">47</span></a>    <span class="k">except</span> <span class="n">DumpError</span><span class="p">:</span>
-</span><span id="L-48"><a href="#L-48"><span class="linenos">48</span></a>        <span class="n">logger</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="s2">&quot;Ошибка создания регулярного дампа&quot;</span><span class="p">)</span>
+</span><span id="L-47"><a href="#L-47"><span class="linenos">47</span></a>    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+</span><span id="L-48"><a href="#L-48"><span class="linenos">48</span></a>        <span class="k">if</span> <span class="n">log_cash_error</span><span class="p">(</span><span class="n">e</span><span class="p">):</span>
+</span><span id="L-49"><a href="#L-49"><span class="linenos">49</span></a>            <span class="n">logger</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="s2">&quot;Ошибка создания регулярного дампа&quot;</span><span class="p">)</span>
 </span></pre></div>
 
 
@@ -167,8 +168,9 @@
 </span><span id="regular_dump-45"><a href="#regular_dump-45"><span class="linenos">45</span></a>            <span class="k">for</span> <span class="n">_dump</span> <span class="ow">in</span> <span class="n">dumps</span><span class="p">[:</span> <span class="nb">len</span><span class="p">(</span><span class="n">dumps</span><span class="p">)</span> <span class="o">-</span> <span class="n">settings</span><span class="o">.</span><span class="n">max_dumps</span><span class="p">]:</span>
 </span><span id="regular_dump-46"><a href="#regular_dump-46"><span class="linenos">46</span></a>                <span class="n">_dump</span><span class="o">.</span><span class="n">unlink</span><span class="p">()</span>
 </span><span id="regular_dump-47"><a href="#regular_dump-47"><span class="linenos">47</span></a>
-</span><span id="regular_dump-48"><a href="#regular_dump-48"><span class="linenos">48</span></a>    <span class="k">except</span> <span class="n">DumpError</span><span class="p">:</span>
-</span><span id="regular_dump-49"><a href="#regular_dump-49"><span class="linenos">49</span></a>        <span class="n">logger</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="s2">&quot;Ошибка создания регулярного дампа&quot;</span><span class="p">)</span>
+</span><span id="regular_dump-48"><a href="#regular_dump-48"><span class="linenos">48</span></a>    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+</span><span id="regular_dump-49"><a href="#regular_dump-49"><span class="linenos">49</span></a>        <span class="k">if</span> <span class="n">log_cash_error</span><span class="p">(</span><span class="n">e</span><span class="p">):</span>
+</span><span id="regular_dump-50"><a href="#regular_dump-50"><span class="linenos">50</span></a>            <span class="n">logger</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="s2">&quot;Ошибка создания регулярного дампа&quot;</span><span class="p">)</span>
 </span></pre></div>
 
 

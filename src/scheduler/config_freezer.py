@@ -30,7 +30,7 @@ async def check_freeze_configs():
         wait_no_cfg = [cfg for cfg in configs if cfg.freeze == FreezeSteps.wait_no]
         for config in wait_no_cfg:
             await WgServerTools().move_user(
-                move="unban", user_pubkey=config.server_public_key
+                move="unban", server_pubkey=config.server_public_key
             )
         if wait_no_cfg:
             await freeze_config(wait_no_cfg, freeze=FreezeSteps.no)
@@ -38,7 +38,7 @@ async def check_freeze_configs():
         wait_yes_cfg = [cfg for cfg in configs if cfg.freeze == FreezeSteps.wait_yes]
         for config in wait_yes_cfg:
             await WgServerTools().move_user(
-                move="ban", user_pubkey=config.server_public_key
+                move="ban", server_pubkey=config.server_public_key
             )
         if wait_yes_cfg:
             await freeze_config(wait_yes_cfg, freeze=FreezeSteps.yes)
