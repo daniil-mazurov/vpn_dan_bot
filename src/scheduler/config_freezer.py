@@ -5,7 +5,8 @@ import logging
 from core.err import log_cash_error
 from core.exceptions import DatabaseError, WireguardError
 from db.models import FreezeSteps
-from db.utils import freeze_config, get_all_wg_configs
+from db.utils import (delete_unregistered_wg_configs, freeze_config,
+                      get_all_wg_configs)
 from wg.utils import WgServerTools
 
 logger = logging.getLogger("apscheduler")
@@ -90,6 +91,7 @@ async def validate_configs():
 
         to_freeze = []
         to_unfreeze = []
+        to_delete = []
 
         for config in local_configs:
             peer = server_peers.get(config.server_public_key, None)
@@ -108,11 +110,19 @@ async def validate_configs():
                     FreezeSteps.wait_no,
                 ):
                     to_unfreeze.append(config)
+            else:
+                logger.warning(
+                    f"Найдена незарегистрированная конфигурация: {config.address}"
+                )
+                
+                to_delete.append(config)
 
         if to_freeze:
             await freeze_config(to_freeze, freeze=FreezeSteps.yes)
         if to_unfreeze:
             await freeze_config(to_unfreeze, freeze=FreezeSteps.no)
+        if to_delete:
+            await delete_unregistered_wg_configs(to_delete)
 
     except DatabaseError as e:
         if log_cash_error(e):
