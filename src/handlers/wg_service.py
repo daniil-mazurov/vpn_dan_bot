@@ -269,7 +269,7 @@ async def get_config_file(callback: CallbackQuery, bot: Bot):
     config_file = await text.create_config_file(config)
 
     await callback.message.answer("Конфигурация " + callback.message.text)
-    await callback.message.answer_document(FSInputFile(config_file, "myVpn.conf"))
+    await callback.message.answer_document(FSInputFile(config_file, f"vpn_{user_config.name[:10]}.conf"))
     await callback.message.answer(
         "‼️ Если у вас возникает ошибка: <b>Неправильное имя</b> "
         "Проверьте имя файла: в нем не должно быть пробелов или спецсимволов (подчеркиваний, скобок ...), "
