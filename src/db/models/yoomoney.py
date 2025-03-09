@@ -35,7 +35,7 @@ class YoomoneyOperation(BaseModel):
     amount: float
     """Сумма операции."""
 
-    label: str
+    label: str | None = None
     """Метка операции."""
 
     type: str
@@ -121,7 +121,7 @@ class YoomoneyOperationDetails(BaseModel):
     expires: str | None = None
     """Срок действия операции (по умолчанию None)."""
 
-    label: str
+    label: str | None = None
     """Метка операции."""
 
     details: str | None = None

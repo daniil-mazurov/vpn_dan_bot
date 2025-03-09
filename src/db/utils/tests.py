@@ -3,9 +3,11 @@
 import asyncio
 import logging
 from datetime import timedelta
+from re import escape
 
 from sqlalchemy import select
 
+from core.config import settings
 from core.exceptions import BaseBotError
 from db.database import execute_query, execute_redis_query, redis_engine
 from db.models import TABLES_SCHEMA, Base
@@ -74,7 +76,14 @@ async def test_server_speed():
         if speed_in and speed_out:
             return float(speed_in), float(speed_out)
 
-        cmd = "iperf3 -O 1 -t 5 -Jc 172.31.0.1 | jq '.end.sum_sent.bits_per_second, .end.sum_received.bits_per_second'"
+        # cmd = "iperf3 -O 1 -t 5 -Jc 172.31.0.1 | jq '.end.sum_sent.bits_per_second, .end.sum_received.bits_per_second'"
+        cmd = f"""echo {escape(settings.BOT_PASS.get_secret_value())} | sudo -S docker run -i --rm \
+    --name wireguard \
+    --network="host" \
+    -e TZ='Europe/Moscow' \
+    --cap-add=NET_ADMIN \
+    --privileged \
+    wireguard iperf3 -O 1 -t 5 -Jc 172.31.0.1 | jq '.end.sum_sent.bits_per_second, .end.sum_received.bits_per_second'"""
 
         proc = await asyncio.create_subprocess_shell(
             cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE

@@ -15,7 +15,7 @@ RUN mkdir tmp
 
 RUN pip install poetry && poetry config virtualenvs.in-project true && poetry install --no-root
 
-RUN apt update && apt install -y postgresql-client
+RUN apt update && apt install -y postgresql-client jq sudo docker.io
 
 # CMD [ "python", "-m", "poetry", "show", "-t" ]
 CMD ["/bin/bash"]

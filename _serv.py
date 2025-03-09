@@ -45,11 +45,9 @@ sentry_sdk.init(
     dsn="https://eda1429f1d444778a00f99681c553f7b@app.glitchtip.com/9075",
     integrations=[
         AsyncioIntegration(),
-        LoggingIntegration(
-            level=logging.ERROR,  # Capture info and above as breadcrumbs
-            event_level=logging.ERROR,  # Send records as events
-        ),
+        LoggingIntegration(level=logging.ERROR, event_level=logging.ERROR),
     ],
+    environment="development",
 )
 
 
@@ -91,9 +89,9 @@ async def favicon():
     return FileResponse(favicon_path)
 
 
-@app.get("/")
-def read_root():
-    return {"Hello": "World"}
+# @app.get("/")
+# def read_root():
+#     return {"Hello": "World"}
 
 
 @app.get("/test")
@@ -169,7 +167,7 @@ if __name__ == "__main__":
             continue
 
         logging.getLogger(extra_logger).info(
-            f"<{'=' * 10} {extra_logger.upper()} START {'='*10}>"
+            f"<{'=' * 10} {extra_logger.upper()} START {'=' * 10}>"
         )
 
     uvicorn.run(
@@ -178,7 +176,7 @@ if __name__ == "__main__":
         host="172.17.0.1",
         port=5000,
         # workers=4,
-        # reload=True,
+        reload=True,
         log_config=server_log,
         log_level="info",
         use_colors=False,

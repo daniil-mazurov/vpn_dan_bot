@@ -3,7 +3,7 @@
 import logging
 import os
 import pickle
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from pandas import DataFrame
 from pydantic import HttpUrl, SecretStr
@@ -97,7 +97,9 @@ class Settings(BaseSettings):
     """ID чата бота."""
     BOT_URL: HttpUrl = "https://t.me/vpn_dan_bot"
     """URL бота."""
-    subserver_url: HttpUrl = "http:/assa.ddns.net"
+    BOT_PASS: SecretStr
+    """Пароль пользователя бота на сервере."""
+    subserver_url: HttpUrl = "https:/danvpn.site"
     """URL подсервера."""
 
     DB_HOST: str
@@ -203,7 +205,21 @@ noticed_time = os.path.join(
 )
 """Сериализованная дата последнего уведомления пользователей"""
 
+
+def time_actualize(timefile):
+    with open(timefile, "wb") as file:
+        pickle.dump(last_updated, file)
+
+
 for timefile in (decr_time, noticed_time):
-    if not os.path.isfile(timefile):
-        with open(timefile, "wb") as file:
-            pickle.dump(last_updated, file)
+    if not os.path.isfile(timefile) or os.path.getsize(timefile) <= 0:
+        time_actualize(timefile)
+
+    else:
+        with open(timefile, "rb") as file:
+            prev_updated: datetime = pickle.load(file)
+
+        diff = last_updated - prev_updated
+
+        if diff > timedelta(days=2):
+            time_actualize(timefile)

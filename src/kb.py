@@ -1,11 +1,7 @@
 """Все кнопки и клавиатуры для хендлеров"""
 
-from aiogram.types import (
-    InlineKeyboardButton,
-    InlineKeyboardMarkup,
-    KeyboardButton,
-    ReplyKeyboardMarkup,
-)
+from aiogram.types import (InlineKeyboardButton, InlineKeyboardMarkup,
+                           KeyboardButton, ReplyKeyboardMarkup)
 from pytils.numeral import get_plural
 
 from core.config import settings

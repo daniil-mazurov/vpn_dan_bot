@@ -5,7 +5,8 @@ import logging
 from core.err import log_cash_error
 from core.exceptions import DatabaseError, WireguardError
 from db.models import FreezeSteps
-from db.utils import delete_unregistered_wg_configs, freeze_config, get_all_wg_configs
+from db.utils import (delete_unregistered_wg_configs, freeze_config,
+                      get_all_wg_configs)
 from wg.utils import WgServerTools
 
 logger = logging.getLogger("apscheduler")

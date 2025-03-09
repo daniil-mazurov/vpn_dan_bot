@@ -19,7 +19,8 @@ from core.metric import async_speed_metric
 from db import utils
 from db.models import FreezeSteps, UserActivity, UserData, WgConfig
 from handlers.utils import find_config, find_user
-from kb import get_config_keyboard, remove_config, static_pay_button, why_freezed_button
+from kb import (get_config_keyboard, remove_config, static_pay_button,
+                why_freezed_button)
 from wg.utils import WgServerTools
 
 logger = logging.getLogger()
