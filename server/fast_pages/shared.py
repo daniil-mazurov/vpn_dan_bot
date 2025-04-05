@@ -30,12 +30,12 @@ def bot_page(
                 on_click=GoToEvent(url=f"/bot/tables/{mod.UserData.__tablename__}"),
                 active="startswith:/bot/tables",
             ),
-            c.Link(
-                components=[c.Text(text="ErrorLog")],
-                on_click=GoToEvent(
-                    url="https://app.glitchtip.com/danvpn/issues?query=is:unresolved"
-                ),
-            ),
+            # c.Link(
+            #     components=[c.Text(text="ErrorLog")],
+            #     on_click=GoToEvent(
+            #         url="https://app.glitchtip.com/danvpn/issues?query=is:unresolved"
+            #     ),
+            # ),
         )
     else:
         authorised = (

@@ -78,8 +78,52 @@ async def profile(
     user: Annotated[User, Depends(User.from_request)],
 ) -> list[AnyComponent]:
     return bot_page(
-        c.Paragraph(text=f'You are logged in as "{user.login}".'),
-        c.Button(text="Logout", on_click=PageEvent(name="submit-form")),
+        c.Div(
+            components=[
+                c.Paragraph(text=f'You are logged in as "{user.login}".'),
+                c.Button(
+                    text="Logout",
+                    on_click=PageEvent(name="submit-form"),
+                    class_name="+ ms-2",
+                ),
+            ],
+            class_name="d-flex align-items-center",  # Используем Flexbox для горизонтального выравнивания
+        ),
+        c.Paragraph(text="\nAdmin instruments"),
+        c.Div(
+            components=[
+                c.Link(
+                    components=[c.Button(text="ErrorLog", named_style="secondary")],
+                    on_click=GoToEvent(
+                        url="https://app.glitchtip.com/danvpn/issues?query=is:unresolved"
+                    ),
+                    class_name="+ ms-2",
+                ),
+                c.Link(
+                    components=[c.Button(text="PgAdmin4", named_style="secondary")],
+                    on_click=GoToEvent(url=f"{settings.subserver_url}pgadmin"),
+                    class_name="+ ms-2",
+                ),
+                c.Link(
+                    components=[c.Button(text="Portainer", named_style="secondary")],
+                    on_click=GoToEvent(url=f"{settings.subserver_url}portainer"),
+                    class_name="+ ms-2",
+                ),
+                c.Link(
+                    components=[c.Button(text="InfluxDB", named_style="secondary")],
+                    on_click=GoToEvent(
+                        url=f"http://{settings.subserver_url.host}:8086"
+                    ),
+                    class_name="+ ms-2",
+                ),
+                c.Link(
+                    components=[c.Button(text="Grafana", named_style="secondary")],
+                    on_click=GoToEvent(url=f"{settings.subserver_url}grafana"),
+                    class_name="+ ms-2",
+                ),
+            ],
+            class_name="d-flex align-items-center",  # Используем Flexbox для горизонтального выравнивания
+        ),
         c.Form(
             submit_url="/api/bot/auth/logout",
             form_fields=[
