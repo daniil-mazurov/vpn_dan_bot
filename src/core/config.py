@@ -102,6 +102,11 @@ class Settings(BaseSettings):
     subserver_url: HttpUrl = "https:/danvpn.site"
     """URL подсервера."""
 
+    WEB_HOST: str
+    """Адрес веб сайта"""
+    WEB_PORT: int
+    """Порт веб сайта"""
+
     DB_HOST: str
     """Хост базы данных."""
     DB_PORT: int

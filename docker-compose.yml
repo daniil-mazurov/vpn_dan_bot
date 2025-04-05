@@ -1,0 +1,175 @@
+services:
+
+############################
+# MAIN
+############################
+
+  website:
+    build: .
+    container_name: danvpn-website
+    environment:
+      TZ: "Europe/Moscow"
+    volumes:
+      - /home/bot/vpn_dan_bot_docker/logs/:/vpn_dan_bot/logs
+      - /home/bot/vpn_dan_bot_docker/bugs/:/vpn_dan_bot/bugs
+      - /home/bot/vpn_dan_bot_docker/timepoint/:/vpn_dan_bot/src/scheduler/timepoint
+      - /var/run/docker.sock:/var/run/docker.sock \
+    networks:
+      internal:
+        ipv4_address: "$WEB_HOST"
+    command: ./_serv.py
+    restart: unless-stopped
+
+############################
+# DanVPN - SERVICES
+############################
+
+  database:
+    image: postgres:14.17-alpine3.21
+    container_name: danvpn-postgres
+    environment:
+      TZ: "Europe/Moscow"
+      POSTGRES_USER: "$DB_USER" 
+      POSTGRES_PASSWORD: "$DB_PASS"
+      POSTGRES_DB: "$DB_NAME"
+    volumes:
+      - /home/bot/vpn_dan_bot_docker/postgresql/data:/var/lib/postgresql/data
+    networks:
+      internal:
+        ipv4_address: "$DB_HOST"
+    restart: unless-stopped
+
+  redis:
+    image: redis:7.4.2-alpine3.21
+    container_name: danvpn-redis
+    environment:
+      TZ: "Europe/Moscow"
+    volumes:
+      - /home/bot/vpn_dan_bot_docker/redis/dаta:/data
+    networks:
+      internal:
+        ipv4_address: "$REDIS_HOST"
+    command: redis-server --appendonly yes --requirepass "$REDIS_PASS" --replica-read-only no
+    restart: unless-stopped
+
+############################
+# INSTRUMENTS
+############################
+
+  speedtest:
+    build: ./src/iperf
+    container_name: danvpn-speedtest
+    profiles: ["special"]
+    environment:
+      TZ: "Europe/Moscow"
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE
+    networks:
+      - wgnet
+
+  pgadmin:
+    image: dpage/pgadmin4:9.2.0
+    container_name: pgadmin4
+    environment:
+      TZ: "Europe/Moscow"
+      PGADMIN_LISTEN_PORT: "$PGADMIN_PORT"
+      PGADMIN_DEFAULT_EMAIL: "$PGADMIN_USER"
+      PGADMIN_DEFAULT_PASSWORD: "$PGADMIN_PASS"            
+      PGADMIN_SERVER_JSON_FILE: '/pgadmin4/servers.json'
+    volumes:
+        - ./servers.json:/pgadmin4/servers.json
+    networks:
+      internal:
+        ipv4_address: "$PGADMIN_HOST"
+    restart: unless-stopped
+
+  portainer:
+    image: portainer/portainer-ce:2.27.3-alpine
+    container_name: portainer
+    environment:
+      TZ: "Europe/Moscow"
+      VIRTUAL_HOST: "$BOT_DOMAIN"
+      VIRTUAL_PORT: "$PORTAINER_PORT"
+      LETSENCRYPT_HOST: "$BOT_DOMAIN"
+      LETSENCRYPT_EMAIL: "$ADMIN_MAIL"
+    volumes:
+      - /home/bot/vpn_dan_bot_docker/portainer_data:/data 
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      internal:
+        ipv4_address: "$PORTAINER_HOST"
+    restart: unless-stopped
+
+############################
+# METRICS
+############################
+
+  influxdb:
+    image: influxdb:2.7.11-alpine
+    container_name: danvpn-influxdb
+    environment:
+      TZ: "Europe/Moscow"
+      # DOCKER_INFLUXDB_INIT_MODE: setup
+      # DOCKER_INFLUXDB_INIT_USERNAME: "$INFLUXDB_USER"
+      # DOCKER_INFLUXDB_INIT_PASSWORD: "$INFLUXDB_PASS"
+      # DOCKER_INFLUXDB_INIT_BUCKET: "$INFLUXDB_NAME"
+      # DOCKER_INFLUXDB_INIT_ORG: "$INFLUXDB_ORG"
+    volumes:
+      - /home/bot/vpn_dan_bot_docker/influxdb/data:/var/lib/influxdb2 
+      - /home/bot/vpn_dan_bot_docker/influxdb/config:/etc/influxdb2
+    networks:
+      metrics:
+        ipv4_address: "$INFLUXDB_HOST"
+    ports:
+      - "8086:8086"
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:11.6.0-ubuntu
+    container_name: danvpn-grafana
+    environment:
+      GF_SERVER_ROOT_URL: http://danvpn.site/grafana/
+    volumes:
+      - /home/bot/vpn_dan_bot_docker/grafana:/var/lib/grafana
+    user : '0'
+    networks:
+      metrics:
+        ipv4_address: "$GRAFANA_HOST"
+    # ports:
+    #   - '3000:3000'
+    restart: unless-stopped
+
+############################
+# NETWORK
+############################
+
+  nginx:
+    build: ./src/nginx
+    container_name: danvpn-nginx
+    environment:
+      TZ: "Europe/Moscow"
+      DOMAIN: "$BOT_DOMAIN"
+      EMAIL: "$ADMIN_MAIL"
+    volumes:
+      - /home/bot/vpn_dan_bot_docker/nginx/data:/etc/nginx
+      - /home/bot/vpn_dan_bot_docker/nginx/certs:/etc/letsencrypt
+    network_mode: host
+    restart: unless-stopped
+
+networks:
+  internal:
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.10.1.0/24
+  metrics:
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.10.2.0/24
+  wgnet:
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.10.3.0/24

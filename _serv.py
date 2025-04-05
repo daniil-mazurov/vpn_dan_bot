@@ -33,6 +33,7 @@ from server.pages.index import router as index_router
 from server.pages.pricing import router as pricing_router
 from server.pages.profile import router as profile_router
 from src.app import models as mod
+from src.core.config import settings
 from src.core.path import PATH
 from src.db.utils import confirm_success_pay
 
@@ -89,9 +90,9 @@ async def favicon():
     return FileResponse(favicon_path)
 
 
-# @app.get("/")
-# def read_root():
-#     return {"Hello": "World"}
+@app.get("/")
+def read_root():
+    return RedirectResponse(url="/vpn", status_code=status.HTTP_307_TEMPORARY_REDIRECT)
 
 
 @app.get("/test")
@@ -173,8 +174,10 @@ if __name__ == "__main__":
     uvicorn.run(
         "_serv:app",
         # host="127.0.0.1",
-        host="172.17.0.1",
-        port=5000,
+        # host="172.17.0.1",
+        # port=5000,
+        host=settings.WEB_HOST,
+        port=settings.WEB_PORT,
         # workers=4,
         reload=True,
         log_config=server_log,
