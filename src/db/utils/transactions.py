@@ -218,3 +218,9 @@ async def raise_money():
         for user in users:
             await delete_cash_transactions(user.telegram_id)
             await CashManager(UserData).delete(user.telegram_id)
+
+        banned_users = [
+            user for user in users if user.fbalance() - user.stage * settings.cost <= 0
+        ]
+
+        return banned_users

@@ -54,18 +54,36 @@ def increment_time(timeFile: str):
         pickle.dump(prev_updated + timedelta(days=1), file)
 
 
-async def balance_decrement():
+async def balance_decrement(bot: Bot):
     """Осуществляет ежедневное списание средств с баланса пользователей.
 
     Проверяет, прошло ли больше суток с последнего списания, и если да,
     вызывает функцию для списания средств. Логирует информацию о проведенном списании.
     """
     try:
+        banned_users = []
+
         if check_time(decr_time):
-            await raise_money()
+            banned_users = await raise_money()
             logger.info("Произведено ежедневное списание")
 
             increment_time(decr_time)
+        if banned_users:
+            for user in banned_users:
+                await bot.send_message(
+                    user.telegram_id,
+                    "Здравствуйте, ваш аккаунт был заблокирован, поскольку баланс опустился ниже нуля,"
+                    " однако если вы пополните баланс, то снова сможете пользоваться сервисом!",
+                    reply_markup=static_balance_button,
+                )
+                logger.info(
+                    "Отправлено уведомление о возврате в сервис",
+                    extra={
+                        "user_id": user.telegram_id,
+                        "trigger": f"balance={user.balance}",
+                    },
+                )
+
     except Exception as e:
         if log_cash_error(e):
             logger.exception(

@@ -94,6 +94,7 @@ def create_scheduler(bot):
         trigger="interval",
         seconds=3600,
         start_date=datetime.now() + timedelta(seconds=20),
+        kwargs={"bot": bot},
     )
     scheduler.add_job(
         users_notice,
