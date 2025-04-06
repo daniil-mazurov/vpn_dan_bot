@@ -45,6 +45,46 @@ document.addEventListener('DOMContentLoaded', function () {
         configCreatedModal.style.display = 'flex';
     });
 
+    configCreatedModal.querySelector('.confirm').addEventListener('click', () => {
+        configCreatedModal.style.display = 'flex';
+        window.location.reload();
+    });
+
+    document.getElementById('createConfigButton').addEventListener('click', function (event) {
+        event.preventDefault();
+
+        const configCreatedModal = document.getElementById('configCreatedModal');
+        const modalMessage = configCreatedModal.querySelector('p');
+        const modalTitle = configCreatedModal.querySelector('h3');
+
+        fetch('/vpn/profile/create', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({})
+        })
+            .then(response => response.json()) // Парсим JSON-ответ
+            .then(data => {
+                if (data.success) {
+                    console.log('Конфигурация успешно создана');
+                    modalTitle.textContent = 'Успешно!';
+                    modalMessage.textContent = data.message; // Используем сообщение из FastAPI
+                } else {
+                    console.error('Ошибка при создании конфигурации:', data.message);
+                    modalTitle.textContent = 'Ошибка!';
+                    modalMessage.textContent = data.message || 'Не удалось создать конфигурацию. Пожалуйста, попробуйте позже.';
+                }
+                configCreatedModal.style.display = 'flex';
+            })
+            .catch(error => {
+                console.error('Ошибка сети:', error);
+                modalTitle.textContent = 'Ошибка сети!';
+                modalMessage.textContent = 'Произошла ошибка при подключении к серверу. Пожалуйста, проверьте ваше интернет-соединение.';
+                configCreatedModal.style.display = 'flex';
+            });
+    });
+
     addFundsButton.addEventListener('click', () => {
         addFundsModal.style.display = 'flex';
     });

@@ -50,6 +50,14 @@ async def main_page(
     )
 
 
+@router.get("/about", response_class=HTMLResponse)
+async def about_page(
+    request: Request,
+    user: Annotated[User, Depends(User.from_request_opt)],
+):
+    return templates.TemplateResponse("about.html", {"request": request})
+
+
 @router.get("/500", response_class=HTMLResponse)
 async def internal_error(request: Request):
     return templates.TemplateResponse("500.html", {"request": request})
