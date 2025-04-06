@@ -4,21 +4,68 @@ services:
 # MAIN
 ############################
 
-  website:
-    build: .
-    container_name: danvpn-website
+  danvpn_image:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: danvpn:latest
+    container_name: danvpn-builder
+    profiles: ["special"]
+
+  bot:
+    image: danvpn:latest
+    container_name: danvpn-bot
     environment:
       TZ: "Europe/Moscow"
     volumes:
       - /home/bot/vpn_dan_bot_docker/logs/:/vpn_dan_bot/logs
       - /home/bot/vpn_dan_bot_docker/bugs/:/vpn_dan_bot/bugs
+      - /home/bot/vpn_dan_bot_docker/dumps/:/vpn_dan_bot/src/db/dumps
+      - /home/bot/vpn_dan_bot_docker/backups/:/vpn_dan_bot/src/db/backups
       - /home/bot/vpn_dan_bot_docker/timepoint/:/vpn_dan_bot/src/scheduler/timepoint
-      - /var/run/docker.sock:/var/run/docker.sock \
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      internal:
+        ipv4_address: "$BOT_HOST"
+    command: ./_main.py
+    restart: unless-stopped
+    depends_on:
+      - database
+      - redis
+      - website
+    healthcheck:
+      test: ["CMD-SHELL", "ps -ef | grep _main.py | grep -v grep || exit 1"]
+      interval: 1m
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
+  website:
+    image: danvpn:latest
+    container_name: danvpn-website
+    environment:
+      TZ: "Europe/Moscow"
+      TEST_WEB: "http://$WEB_HOST:$WEB_PORT/test"
+    volumes:
+      - /home/bot/vpn_dan_bot_docker/logs/:/vpn_dan_bot/logs
+      - /home/bot/vpn_dan_bot_docker/bugs/:/vpn_dan_bot/bugs
+      - /home/bot/vpn_dan_bot_docker/timepoint/:/vpn_dan_bot/src/scheduler/timepoint
+      - /var/run/docker.sock:/var/run/docker.sock
     networks:
       internal:
         ipv4_address: "$WEB_HOST"
     command: ./_serv.py
     restart: unless-stopped
+    depends_on:
+      - nginx
+      - database
+      - redis
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f $$TEST_WEB || exit 1"]
+      interval: 1m
+      timeout: 5s
+      retries: 3
+      start_period: 30s
 
 ############################
 # DanVPN - SERVICES
@@ -29,28 +76,44 @@ services:
     container_name: danvpn-postgres
     environment:
       TZ: "Europe/Moscow"
-      POSTGRES_USER: "$DB_USER" 
-      POSTGRES_PASSWORD: "$DB_PASS"
+      POSTGRES_USER: "$DB_USER"
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgres_secret
       POSTGRES_DB: "$DB_NAME"
+    secrets:
+      - postgres_secret
     volumes:
       - /home/bot/vpn_dan_bot_docker/postgresql/data:/var/lib/postgresql/data
     networks:
       internal:
         ipv4_address: "$DB_HOST"
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "sh", "-c", "export PGPASSWORD=$(cat /run/secrets/postgres_secret) && psql -U $$POSTGRES_USER -d $$POSTGRES_DB -c 'SELECT 1'"]
+      interval: 1m
+      timeout: 5s
+      retries: 5
+      start_period: 10s
 
   redis:
     image: redis:7.4.2-alpine3.21
     container_name: danvpn-redis
     environment:
       TZ: "Europe/Moscow"
+    secrets:
+      - redis_secret
     volumes:
       - /home/bot/vpn_dan_bot_docker/redis/dаta:/data
     networks:
       internal:
         ipv4_address: "$REDIS_HOST"
-    command: redis-server --appendonly yes --requirepass "$REDIS_PASS" --replica-read-only no
+    command: ["sh", "-c", "redis-server --appendonly yes --requirepass \"$(cat /run/secrets/redis_secret)\" --replica-read-only no"]
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "sh", "-c",  "redis-cli -h localhost -a \"$(cat /run/secrets/redis_secret)\" ping | grep -q PONG || exit 1"]
+      interval: 1m
+      timeout: 3s
+      retries: 5
+      start_period: 3s
 
 ############################
 # INSTRUMENTS
@@ -69,29 +132,36 @@ services:
       - wgnet
 
   pgadmin:
+    # user: root
     image: dpage/pgadmin4:9.2.0
     container_name: pgadmin4
     environment:
       TZ: "Europe/Moscow"
       PGADMIN_LISTEN_PORT: "$PGADMIN_PORT"
       PGADMIN_DEFAULT_EMAIL: "$PGADMIN_USER"
-      PGADMIN_DEFAULT_PASSWORD: "$PGADMIN_PASS"            
+      PGADMIN_DEFAULT_PASSWORD: "${PGADMIN_PASS}"            
       PGADMIN_SERVER_JSON_FILE: '/pgadmin4/servers.json'
+      TEST_WEB: "$PGADMIN_HOST:$PGADMIN_PORT/pgadmin"
+    secrets:
+      - pgadmin_secret
     volumes:
         - ./servers.json:/pgadmin4/servers.json
     networks:
       internal:
         ipv4_address: "$PGADMIN_HOST"
     restart: unless-stopped
+    depends_on:
+      - nginx
+      - database
 
   portainer:
     image: portainer/portainer-ce:2.27.3-alpine
     container_name: portainer
     environment:
       TZ: "Europe/Moscow"
-      VIRTUAL_HOST: "$BOT_DOMAIN"
+      VIRTUAL_HOST: "$DANVPN_DOMAIN"
       VIRTUAL_PORT: "$PORTAINER_PORT"
-      LETSENCRYPT_HOST: "$BOT_DOMAIN"
+      LETSENCRYPT_HOST: "$DANVPN_DOMAIN"
       LETSENCRYPT_EMAIL: "$ADMIN_MAIL"
     volumes:
       - /home/bot/vpn_dan_bot_docker/portainer_data:/data 
@@ -100,6 +170,8 @@ services:
       internal:
         ipv4_address: "$PORTAINER_HOST"
     restart: unless-stopped
+    depends_on:
+      - nginx
 
 ############################
 # METRICS
@@ -124,12 +196,14 @@ services:
     ports:
       - "8086:8086"
     restart: unless-stopped
+    depends_on:
+      - nginx
 
   grafana:
     image: grafana/grafana:11.6.0-ubuntu
     container_name: danvpn-grafana
     environment:
-      GF_SERVER_ROOT_URL: http://danvpn.site/grafana/
+      GF_SERVER_ROOT_URL: "https://$DANVPN_DOMAIN/grafana/"
     volumes:
       - /home/bot/vpn_dan_bot_docker/grafana:/var/lib/grafana
     user : '0'
@@ -139,6 +213,8 @@ services:
     # ports:
     #   - '3000:3000'
     restart: unless-stopped
+    depends_on:
+      - nginx
 
 ############################
 # NETWORK
@@ -149,13 +225,26 @@ services:
     container_name: danvpn-nginx
     environment:
       TZ: "Europe/Moscow"
-      DOMAIN: "$BOT_DOMAIN"
+      DOMAIN: "$DANVPN_DOMAIN"
       EMAIL: "$ADMIN_MAIL"
+      TEST_WEB: "http://127.0.0.1/healthcheck"
     volumes:
       - /home/bot/vpn_dan_bot_docker/nginx/data:/etc/nginx
       - /home/bot/vpn_dan_bot_docker/nginx/certs:/etc/letsencrypt
-    network_mode: host
+    # network_mode: host
+    networks:
+      - internal
+      - metrics
+    ports:
+      - "80:80"
+      - "443:443"
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f $$TEST_WEB || exit 1"]
+      interval: 1m
+      timeout: 5s
+      retries: 3
+      start_period: 5s
 
 networks:
   internal:
@@ -173,3 +262,15 @@ networks:
       driver: default
       config:
         - subnet: 10.10.3.0/24
+
+############################
+# PASSWORDS
+############################
+
+secrets:
+  postgres_secret:
+    file: ./.secrets/postgres
+  redis_secret:
+    file: ./.secrets/redis
+  pgadmin_secret:
+    file: ./.secrets/pgadmin

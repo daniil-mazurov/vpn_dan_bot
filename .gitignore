@@ -4,6 +4,7 @@
 *__pycache__
 *.venv
 *.env*
+.secrets/*
 *.ssh*
 *polygon.ipynb
 *polygon.py
