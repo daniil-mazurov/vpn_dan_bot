@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "vpn-dan-bot"
-version = "0.5.9"
+version = "0.5.11"
 description = "Чат-бот и вебсайт для сервиса DanVPN"
 authors = ["daniil-mazurov"]
 readme = "README.md"
@@ -26,6 +26,7 @@ alembic = "^1.14.0"
 isort = "^5.13.2"
 ipykernel = "^6.29.5"
 pdoc = "^15.0.0"
+git-filter-repo = "^2.47.0"
 
 
 [tool.poetry.group.database.dependencies]

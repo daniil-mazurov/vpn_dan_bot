@@ -30,15 +30,23 @@ services:
     command: ./_main.py
     restart: unless-stopped
     depends_on:
-      - database
-      - redis
-      - website
+      database:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      website:
+        condition: service_healthy
     healthcheck:
       test: [ "CMD-SHELL", "ps -ef | grep _main.py | grep -v grep || exit 1" ]
       interval: 1m
       timeout: 5s
       retries: 3
       start_period: 30s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   website:
     image: danvpn:latest
@@ -57,9 +65,12 @@ services:
     command: ./_serv.py
     restart: unless-stopped
     depends_on:
-      - nginx
-      - database
-      - redis
+      nginx:
+        condition: service_healthy
+      database:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     healthcheck:
       test: [ "CMD-SHELL", "curl -f $$TEST_WEB || exit 1" ]
       interval: 1m
@@ -71,6 +82,11 @@ services:
         limits:
           cpus: '0.5'
           memory: 512M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   ############################
   # DanVPN - SERVICES
@@ -88,6 +104,8 @@ services:
       - postgres_secret
     volumes:
       - $DANVPN_VOLUME/postgresql/data:/var/lib/postgresql/data
+      # - ./.config/pg_hba.conf:/var/lib/postgresql/data/pg_hba.conf
+      - ./.config/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
     networks:
       internal:
         ipv4_address: "${DB_HOST}"
@@ -103,6 +121,11 @@ services:
         limits:
           cpus: '0.5'
           memory: 512M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   redis:
     image: redis:7.4.2-alpine3.21
@@ -129,6 +152,11 @@ services:
         limits:
           cpus: '0.5'
           memory: 512M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   ############################
   # INSTRUMENTS
@@ -167,7 +195,6 @@ services:
       TZ: "Europe/Moscow"
       PGADMIN_LISTEN_PORT: "${PGADMIN_PORT}"
       PGADMIN_DEFAULT_EMAIL: "${PGADMIN_USER}"
-      # PGADMIN_DEFAULT_PASSWORD: "${PGADMIN_PASS}"
       PGADMIN_DEFAULT_PASSWORD_FILE: /run/secrets/pgadmin_secret
       PGADMIN_SERVER_JSON_FILE: '/pgadmin4/servers.json'
       TEST_WEB: "${PGADMIN_HOST}:${PGADMIN_PORT}/pgadmin"
@@ -180,13 +207,20 @@ services:
         ipv4_address: "${PGADMIN_HOST}"
     restart: unless-stopped
     depends_on:
-      - nginx
-      - database
+      nginx:
+        condition: service_healthy
+      database:
+        condition: service_healthy
     deploy:
       resources:
         limits:
           cpus: '0.5'
           memory: 512M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   portainer:
     # profiles: [ "special" ]
@@ -206,12 +240,18 @@ services:
         ipv4_address: "${PORTAINER_HOST}"
     restart: unless-stopped
     depends_on:
-      - nginx
+      nginx:
+        condition: service_healthy
     deploy:
       resources:
         limits:
           cpus: '0.5'
           memory: 512M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   ############################
   # METRICS
@@ -239,12 +279,18 @@ services:
       - "8086:8086"
     restart: unless-stopped
     depends_on:
-      - nginx
+      nginx:
+        condition: service_healthy
     deploy:
       resources:
         limits:
           cpus: '0.5'
           memory: 512M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   grafana:
     image: grafana/grafana:11.6.0-ubuntu
@@ -261,12 +307,18 @@ services:
         ipv4_address: "${GRAFANA_HOST}"
     restart: unless-stopped
     depends_on:
-      - nginx
+      nginx:
+        condition: service_healthy
     deploy:
       resources:
         limits:
           cpus: '0.5'
           memory: 512M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   ############################
   # NETWORK
@@ -302,6 +354,11 @@ services:
         limits:
           cpus: '0.5'
           memory: 512M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
 networks:
   internal:

@@ -5,6 +5,7 @@
 *.venv
 *.env*
 .secrets/*
+.config/*
 *.ssh*
 *polygon.ipynb
 *polygon.py
