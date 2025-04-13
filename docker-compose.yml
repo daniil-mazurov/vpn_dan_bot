@@ -1,16 +1,16 @@
 services:
 
-############################
-# MAIN
-############################
+  ############################
+  # MAIN
+  ############################
 
-  danvpn_image:
+  danvpn_builder:
+    profiles: [ "special" ]
     build:
       context: .
       dockerfile: Dockerfile
     image: danvpn:latest
     container_name: danvpn-builder
-    profiles: ["special"]
 
   bot:
     image: danvpn:latest
@@ -18,12 +18,12 @@ services:
     environment:
       TZ: "Europe/Moscow"
     volumes:
-      - /home/bot/vpn_dan_bot_docker/logs/:/vpn_dan_bot/logs
-      - /home/bot/vpn_dan_bot_docker/bugs/:/vpn_dan_bot/bugs
-      - /home/bot/vpn_dan_bot_docker/dumps/:/vpn_dan_bot/src/db/dumps
-      - /home/bot/vpn_dan_bot_docker/backups/:/vpn_dan_bot/src/db/backups
-      - /home/bot/vpn_dan_bot_docker/timepoint/:/vpn_dan_bot/src/scheduler/timepoint
-      - /var/run/docker.sock:/var/run/docker.sock
+      - $DANVPN_VOLUME/danvpn/logs/:/vpn_dan_bot/logs
+      - $DANVPN_VOLUME/danvpn/bugs/:/vpn_dan_bot/bugs
+      - $DANVPN_VOLUME/danvpn/dumps/:/vpn_dan_bot/src/db/dumps
+      - $DANVPN_VOLUME/danvpn/backups/:/vpn_dan_bot/src/db/backups
+      - $DANVPN_VOLUME/danvpn/timepoint/:/vpn_dan_bot/src/scheduler/timepoint
+    #      - /var/run/docker.sock:/var/run/docker.sock
     networks:
       internal:
         ipv4_address: "$BOT_HOST"
@@ -34,7 +34,7 @@ services:
       - redis
       - website
     healthcheck:
-      test: ["CMD-SHELL", "ps -ef | grep _main.py | grep -v grep || exit 1"]
+      test: [ "CMD-SHELL", "ps -ef | grep _main.py | grep -v grep || exit 1" ]
       interval: 1m
       timeout: 5s
       retries: 3
@@ -47,10 +47,10 @@ services:
       TZ: "Europe/Moscow"
       TEST_WEB: "http://$WEB_HOST:$WEB_PORT/test"
     volumes:
-      - /home/bot/vpn_dan_bot_docker/logs/:/vpn_dan_bot/logs
-      - /home/bot/vpn_dan_bot_docker/bugs/:/vpn_dan_bot/bugs
-      - /home/bot/vpn_dan_bot_docker/timepoint/:/vpn_dan_bot/src/scheduler/timepoint
-      - /var/run/docker.sock:/var/run/docker.sock
+      - $DANVPN_VOLUME/danvpn/logs/:/vpn_dan_bot/logs
+      - $DANVPN_VOLUME/danvpn/bugs/:/vpn_dan_bot/bugs
+      - $DANVPN_VOLUME/danvpn/timepoint/:/vpn_dan_bot/src/scheduler/timepoint
+    #      - /var/run/docker.sock:/var/run/docker.sock
     networks:
       internal:
         ipv4_address: "$WEB_HOST"
@@ -61,38 +61,48 @@ services:
       - database
       - redis
     healthcheck:
-      test: ["CMD-SHELL", "curl -f $$TEST_WEB || exit 1"]
+      test: [ "CMD-SHELL", "curl -f $$TEST_WEB || exit 1" ]
       interval: 1m
       timeout: 5s
       retries: 3
       start_period: 30s
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
 
-############################
-# DanVPN - SERVICES
-############################
+  ############################
+  # DanVPN - SERVICES
+  ############################
 
   database:
     image: postgres:14.17-alpine3.21
     container_name: danvpn-postgres
     environment:
       TZ: "Europe/Moscow"
-      POSTGRES_USER: "$DB_USER"
+      POSTGRES_USER: "${DB_USER}"
       POSTGRES_PASSWORD_FILE: /run/secrets/postgres_secret
-      POSTGRES_DB: "$DB_NAME"
+      POSTGRES_DB: "${DB_NAME}"
     secrets:
       - postgres_secret
     volumes:
-      - /home/bot/vpn_dan_bot_docker/postgresql/data:/var/lib/postgresql/data
+      - $DANVPN_VOLUME/postgresql/data:/var/lib/postgresql/data
     networks:
       internal:
-        ipv4_address: "$DB_HOST"
+        ipv4_address: "${DB_HOST}"
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "sh", "-c", "export PGPASSWORD=$(cat /run/secrets/postgres_secret) && psql -U $$POSTGRES_USER -d $$POSTGRES_DB -c 'SELECT 1'"]
+      test: [ "CMD", "psql", "-U", "${DB_USER}", "-d", "${DB_NAME}", "-w", "-c", "SELECT 1;" ]
       interval: 1m
       timeout: 5s
       retries: 5
       start_period: 10s
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
 
   redis:
     image: redis:7.4.2-alpine3.21
@@ -102,27 +112,32 @@ services:
     secrets:
       - redis_secret
     volumes:
-      - /home/bot/vpn_dan_bot_docker/redis/dаta:/data
+      - $DANVPN_VOLUME/redis/dаta:/data
     networks:
       internal:
         ipv4_address: "$REDIS_HOST"
-    command: ["sh", "-c", "redis-server --appendonly yes --requirepass \"$(cat /run/secrets/redis_secret)\" --replica-read-only no"]
+    command: [ "sh", "-c", "redis-server --appendonly yes --requirepass \"$(cat /run/secrets/redis_secret)\" --replica-read-only no --maxmemory 256mb --maxmemory-policy volatile-lru" ]
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "sh", "-c",  "redis-cli -h localhost -a \"$(cat /run/secrets/redis_secret)\" ping | grep -q PONG || exit 1"]
+      test: [ "CMD", "sh", "-c", "redis-cli -h localhost -a \"$(cat /run/secrets/redis_secret)\" ping | grep -q PONG || exit 1" ]
       interval: 1m
       timeout: 3s
       retries: 5
       start_period: 3s
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
 
-############################
-# INSTRUMENTS
-############################
+  ############################
+  # INSTRUMENTS
+  ############################
 
   speedtest:
+    profiles: [ "special" ]
     build: ./src/iperf
     container_name: danvpn-speedtest
-    profiles: ["special"]
     environment:
       TZ: "Europe/Moscow"
     cap_add:
@@ -131,65 +146,92 @@ services:
     networks:
       - wgnet
 
+  create_tables:
+    profiles: [ "special" ]
+    image: danvpn:latest
+    container_name: danvpn-db-create
+    environment:
+      TZ: "Europe/Moscow"
+    volumes:
+      - $DANVPN_VOLUME/danvpn/logs/:/vpn_dan_bot/logs
+    networks:
+      - internal
+    command: .venv/bin/python ./src/scripts/db_recreate.py
+
   pgadmin:
-    # user: root
     image: dpage/pgadmin4:9.2.0
+    # image: nphung/pgadmin
+    # image: fenglc/pgadmin4:2.1-python3.6-alpine
     container_name: pgadmin4
     environment:
       TZ: "Europe/Moscow"
-      PGADMIN_LISTEN_PORT: "$PGADMIN_PORT"
-      PGADMIN_DEFAULT_EMAIL: "$PGADMIN_USER"
-      PGADMIN_DEFAULT_PASSWORD: "${PGADMIN_PASS}"            
+      PGADMIN_LISTEN_PORT: "${PGADMIN_PORT}"
+      PGADMIN_DEFAULT_EMAIL: "${PGADMIN_USER}"
+      # PGADMIN_DEFAULT_PASSWORD: "${PGADMIN_PASS}"
+      PGADMIN_DEFAULT_PASSWORD_FILE: /run/secrets/pgadmin_secret
       PGADMIN_SERVER_JSON_FILE: '/pgadmin4/servers.json'
-      TEST_WEB: "$PGADMIN_HOST:$PGADMIN_PORT/pgadmin"
+      TEST_WEB: "${PGADMIN_HOST}:${PGADMIN_PORT}/pgadmin"
     secrets:
       - pgadmin_secret
     volumes:
-        - ./servers.json:/pgadmin4/servers.json
+      - ./servers.json:/pgadmin4/servers.json
     networks:
       internal:
-        ipv4_address: "$PGADMIN_HOST"
+        ipv4_address: "${PGADMIN_HOST}"
     restart: unless-stopped
     depends_on:
       - nginx
       - database
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
 
   portainer:
+    # profiles: [ "special" ]
     image: portainer/portainer-ce:2.27.3-alpine
     container_name: portainer
     environment:
       TZ: "Europe/Moscow"
-      VIRTUAL_HOST: "$DANVPN_DOMAIN"
-      VIRTUAL_PORT: "$PORTAINER_PORT"
-      LETSENCRYPT_HOST: "$DANVPN_DOMAIN"
-      LETSENCRYPT_EMAIL: "$ADMIN_MAIL"
+      VIRTUAL_HOST: "${DANVPN_DOMAIN}"
+      VIRTUAL_PORT: "${PORTAINER_PORT}"
+      LETSENCRYPT_HOST: "${DANVPN_DOMAIN}"
+      LETSENCRYPT_EMAIL: "${ADMIN_MAIL}"
     volumes:
-      - /home/bot/vpn_dan_bot_docker/portainer_data:/data 
+      - $DANVPN_VOLUME/portainer_data:/data
       - /var/run/docker.sock:/var/run/docker.sock
     networks:
       internal:
-        ipv4_address: "$PORTAINER_HOST"
+        ipv4_address: "${PORTAINER_HOST}"
     restart: unless-stopped
     depends_on:
       - nginx
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
 
-############################
-# METRICS
-############################
+  ############################
+  # METRICS
+  ############################
 
   influxdb:
     image: influxdb:2.7.11-alpine
     container_name: danvpn-influxdb
     environment:
       TZ: "Europe/Moscow"
-      # DOCKER_INFLUXDB_INIT_MODE: setup
-      # DOCKER_INFLUXDB_INIT_USERNAME: "$INFLUXDB_USER"
-      # DOCKER_INFLUXDB_INIT_PASSWORD: "$INFLUXDB_PASS"
-      # DOCKER_INFLUXDB_INIT_BUCKET: "$INFLUXDB_NAME"
-      # DOCKER_INFLUXDB_INIT_ORG: "$INFLUXDB_ORG"
+      DOCKER_INFLUXDB_INIT_MODE: setup
+      DOCKER_INFLUXDB_INIT_USERNAME: "${INFLUXDB_USER}"
+      DOCKER_INFLUXDB_INIT_PASSWORD: "${INFLUXDB_PASS}"
+      DOCKER_INFLUXDB_INIT_BUCKET: "${INFLUXDB_NAME}"
+      DOCKER_INFLUXDB_INIT_ORG: danvpn
+      DOCKER_INFLUXDB_INIT_RETENTION: 90d
+      DOCKER_INFLUXDB_INIT_ADMIN_TOKEN: "${INFLUX_ADMIN_TOKEN}"
     volumes:
-      - /home/bot/vpn_dan_bot_docker/influxdb/data:/var/lib/influxdb2 
-      - /home/bot/vpn_dan_bot_docker/influxdb/config:/etc/influxdb2
+      - $DANVPN_VOLUME/influxdb/data:/var/lib/influxdb2
+      - $DANVPN_VOLUME/influxdb/config:/etc/influxdb2
     networks:
       metrics:
         ipv4_address: "$INFLUXDB_HOST"
@@ -198,40 +240,50 @@ services:
     restart: unless-stopped
     depends_on:
       - nginx
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
 
   grafana:
     image: grafana/grafana:11.6.0-ubuntu
     container_name: danvpn-grafana
     environment:
+      TZ: "Europe/Moscow"
+      # GF_SECURITY_ADMIN_USER: "${GRAFANA_USER}"
+      # GF_SECURITY_ADMIN_PASSWORD: "${GRAFANA_PASS}"
       GF_SERVER_ROOT_URL: "https://$DANVPN_DOMAIN/grafana/"
     volumes:
-      - /home/bot/vpn_dan_bot_docker/grafana:/var/lib/grafana
-    user : '0'
+      - $DANVPN_VOLUME/grafana:/var/lib/grafana
     networks:
       metrics:
-        ipv4_address: "$GRAFANA_HOST"
-    # ports:
-    #   - '3000:3000'
+        ipv4_address: "${GRAFANA_HOST}"
     restart: unless-stopped
     depends_on:
       - nginx
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
 
-############################
-# NETWORK
-############################
+  ############################
+  # NETWORK
+  ############################
 
   nginx:
     build: ./src/nginx
     container_name: danvpn-nginx
     environment:
       TZ: "Europe/Moscow"
-      DOMAIN: "$DANVPN_DOMAIN"
-      EMAIL: "$ADMIN_MAIL"
+      DOMAIN: "${DANVPN_DOMAIN}"
+      EMAIL: "${ADMIN_MAIL}"
       TEST_WEB: "http://127.0.0.1/healthcheck"
     volumes:
-      - /home/bot/vpn_dan_bot_docker/nginx/data:/etc/nginx
-      - /home/bot/vpn_dan_bot_docker/nginx/certs:/etc/letsencrypt
-    # network_mode: host
+      - $DANVPN_VOLUME/nginx/certs:/etc/letsencrypt
+      - $DANVPN_VOLUME/nginx/data/nginx.conf:/etc/nginx/nginx.conf:ro
+      - $DANVPN_VOLUME/nginx/data/proxy.conf:/etc/nginx/conf.d/proxy.conf:ro
     networks:
       - internal
       - metrics
@@ -240,11 +292,16 @@ services:
       - "443:443"
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "curl -f $$TEST_WEB || exit 1"]
+      test: [ "CMD-SHELL", "curl -f $$TEST_WEB || exit 1" ]
       interval: 1m
       timeout: 5s
       retries: 3
       start_period: 5s
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
 
 networks:
   internal:

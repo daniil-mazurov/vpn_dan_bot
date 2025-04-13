@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "vpn-dan-bot"
-version = "0.3"
-description = "test python 3.12"
+version = "0.5.9"
+description = "Чат-бот и вебсайт для сервиса DanVPN"
 authors = ["daniil-mazurov"]
 readme = "README.md"
 
