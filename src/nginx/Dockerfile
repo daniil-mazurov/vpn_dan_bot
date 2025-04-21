@@ -15,7 +15,7 @@ RUN apk update && \
         /var/lib/letsencrypt \
         /etc/letsencrypt \
         /var/www/certbot \
-    && chown www-data:www \
+    && chown -R www-data:www \
         /var/log/nginx \
         /var/cache/nginx \
         /run/nginx \

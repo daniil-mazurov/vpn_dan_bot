@@ -9,8 +9,8 @@ from aiogram import Bot
 
 from core.config import decr_time, noticed_time
 from core.err import log_cash_error
-from db.models import UserActivity
-from db.utils import get_valid_users, raise_money
+from db.models import UserActivity, UserData
+from db.utils import get_valid_users, raise_money, get_admins
 from kb import static_balance_button
 from text import get_end_sub
 
@@ -64,6 +64,10 @@ async def balance_decrement(bot: Bot):
         banned_users = []
 
         if check_time(decr_time):
+            admin_ids: list[UserData] = await get_admins()
+            for admin in admin_ids:
+                await bot.send_message(admin.telegram_id, "Прозвожу ежедневное списание")
+            
             banned_users = await raise_money()
             logger.info("Произведено ежедневное списание")
 

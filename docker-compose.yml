@@ -4,17 +4,25 @@ services:
   # MAIN
   ############################
 
-  danvpn_builder:
-    profiles: [ "special" ]
+  danvpn-init:
     build:
       context: .
       dockerfile: Dockerfile
     image: danvpn:latest
-    container_name: danvpn-builder
-
+    container_name: danvpn-init
+    user: "0"
+    volumes:
+      - $DANVPN_VOLUME/danvpn/logs/:/logs
+      - $DANVPN_VOLUME/danvpn/bugs/:/bugs
+      - $DANVPN_VOLUME/danvpn/dumps/:/dumps
+      - $DANVPN_VOLUME/danvpn/backups/:/backups
+      - $DANVPN_VOLUME/danvpn/timepoint/:/timepoint
+    entrypoint: ["sh", "-c", "chown -R 1111:1111 /logs /bugs /dumps /backups /timepoint"]
+    
   bot:
     image: danvpn:latest
     container_name: danvpn-bot
+    user: "1111:1111"
     environment:
       TZ: "Europe/Moscow"
     volumes:
@@ -23,13 +31,14 @@ services:
       - $DANVPN_VOLUME/danvpn/dumps/:/vpn_dan_bot/src/db/dumps
       - $DANVPN_VOLUME/danvpn/backups/:/vpn_dan_bot/src/db/backups
       - $DANVPN_VOLUME/danvpn/timepoint/:/vpn_dan_bot/src/scheduler/timepoint
-    #      - /var/run/docker.sock:/var/run/docker.sock
     networks:
       internal:
         ipv4_address: "$BOT_HOST"
     command: ./_main.py
     restart: unless-stopped
     depends_on:
+      danvpn-init:
+        condition: service_completed_successfully
       database:
         condition: service_healthy
       redis:
@@ -51,6 +60,7 @@ services:
   website:
     image: danvpn:latest
     container_name: danvpn-website
+    user: "1111:1111"
     environment:
       TZ: "Europe/Moscow"
       TEST_WEB: "http://$WEB_HOST:$WEB_PORT/test"
@@ -58,13 +68,14 @@ services:
       - $DANVPN_VOLUME/danvpn/logs/:/vpn_dan_bot/logs
       - $DANVPN_VOLUME/danvpn/bugs/:/vpn_dan_bot/bugs
       - $DANVPN_VOLUME/danvpn/timepoint/:/vpn_dan_bot/src/scheduler/timepoint
-    #      - /var/run/docker.sock:/var/run/docker.sock
     networks:
       internal:
         ipv4_address: "$WEB_HOST"
     command: ./_serv.py
     restart: unless-stopped
     depends_on:
+      danvpn-init:
+        condition: service_completed_successfully
       nginx:
         condition: service_healthy
       database:
@@ -92,9 +103,21 @@ services:
   # DanVPN - SERVICES
   ############################
 
+  database-init:
+    image: alpine:latest
+    container_name: database-init
+    user: "0"
+    volumes:
+      - $DANVPN_VOLUME/postgresql/data:/postgres
+      - $DANVPN_VOLUME/redis/dаta:/redis
+      - ./.config/database/init.sh:/usr/local/bin/init.sh
+    entrypoint: ["sh", "-c", "/usr/local/bin/init.sh"]
+    restart: "no"
+
   database:
     image: postgres:14.17-alpine3.21
     container_name: danvpn-postgres
+    user: "2000:2000"
     environment:
       TZ: "Europe/Moscow"
       POSTGRES_USER: "${DB_USER}"
@@ -104,12 +127,16 @@ services:
       - postgres_secret
     volumes:
       - $DANVPN_VOLUME/postgresql/data:/var/lib/postgresql/data
-      # - ./.config/pg_hba.conf:/var/lib/postgresql/data/pg_hba.conf
-      - ./.config/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      # - ./.config/database/pg_hba.conf:/var/lib/postgresql/data/pg_hba.conf:ro
+      - ./.config/database/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
     networks:
       internal:
         ipv4_address: "${DB_HOST}"
+    # command: ["sh", "-c", "postgres -c hba_file=/etc/postgresql/pg_hba.conf"]
     restart: unless-stopped
+    depends_on:
+      database-init:
+        condition: service_completed_successfully
     healthcheck:
       test: [ "CMD", "psql", "-U", "${DB_USER}", "-d", "${DB_NAME}", "-w", "-c", "SELECT 1;" ]
       interval: 1m
@@ -130,6 +157,7 @@ services:
   redis:
     image: redis:7.4.2-alpine3.21
     container_name: danvpn-redis
+    user: "3000:3000"
     environment:
       TZ: "Europe/Moscow"
     secrets:
@@ -141,6 +169,9 @@ services:
         ipv4_address: "$REDIS_HOST"
     command: [ "sh", "-c", "redis-server --appendonly yes --requirepass \"$(cat /run/secrets/redis_secret)\" --replica-read-only no --maxmemory 256mb --maxmemory-policy volatile-lru" ]
     restart: unless-stopped
+    depends_on:
+      database-init:
+        condition: service_completed_successfully
     healthcheck:
       test: [ "CMD", "sh", "-c", "redis-cli -h localhost -a \"$(cat /run/secrets/redis_secret)\" ping | grep -q PONG || exit 1" ]
       interval: 1m
@@ -162,22 +193,24 @@ services:
   # INSTRUMENTS
   ############################
 
-  speedtest:
+  speedtest: #TODO
     profiles: [ "special" ]
     build: ./src/iperf
     container_name: danvpn-speedtest
-    environment:
-      TZ: "Europe/Moscow"
     cap_add:
       - NET_ADMIN
       - SYS_MODULE
+    environment:
+      TZ: "Europe/Moscow"
     networks:
       - wgnet
+    # command: [ "sh", "-c", "iperf3 -O 1 -t 5 -Jc 172.31.0.1 || exit 1" ]
 
-  create_tables:
+  create-tables:
     profiles: [ "special" ]
     image: danvpn:latest
     container_name: danvpn-db-create
+    user: "1111:1111"
     environment:
       TZ: "Europe/Moscow"
     volumes:
@@ -185,12 +218,20 @@ services:
     networks:
       - internal
     command: .venv/bin/python ./src/scripts/db_recreate.py
+    depends_on:
+      danvpn-init:
+        condition: service_completed_successfully
+      database:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
 
   pgadmin:
     image: dpage/pgadmin4:9.2.0
     # image: nphung/pgadmin
     # image: fenglc/pgadmin4:2.1-python3.6-alpine
     container_name: pgadmin4
+    user: "5050:5050"
     environment:
       TZ: "Europe/Moscow"
       PGADMIN_LISTEN_PORT: "${PGADMIN_PORT}"
@@ -201,7 +242,7 @@ services:
     secrets:
       - pgadmin_secret
     volumes:
-      - ./servers.json:/pgadmin4/servers.json
+      - ./.config/servers.json:/pgadmin4/servers.json:ro
     networks:
       internal:
         ipv4_address: "${PGADMIN_HOST}"
@@ -256,10 +297,21 @@ services:
   ############################
   # METRICS
   ############################
+  
+  metrics-init:
+    image: alpine:latest
+    container_name: metrics-init
+    user: "0"
+    volumes:
+      - $DANVPN_VOLUME/grafana:/grafana
+      - $DANVPN_VOLUME/influxdb/data:/influx_data
+      - $DANVPN_VOLUME/influxdb/config:/influx_config
+    entrypoint: [ "sh", "-c", "chown -R 472:472 /grafana /influx_data /influx_data" ]
 
   influxdb:
     image: influxdb:2.7.11-alpine
     container_name: danvpn-influxdb
+    user: "472:472"
     environment:
       TZ: "Europe/Moscow"
       DOCKER_INFLUXDB_INIT_MODE: setup
@@ -279,8 +331,8 @@ services:
       - "8086:8086"
     restart: unless-stopped
     depends_on:
-      nginx:
-        condition: service_healthy
+      metrics-init:
+        condition: service_completed_successfully
     deploy:
       resources:
         limits:
@@ -295,10 +347,9 @@ services:
   grafana:
     image: grafana/grafana:11.6.0-ubuntu
     container_name: danvpn-grafana
+    user: "472:472"
     environment:
       TZ: "Europe/Moscow"
-      # GF_SECURITY_ADMIN_USER: "${GRAFANA_USER}"
-      # GF_SECURITY_ADMIN_PASSWORD: "${GRAFANA_PASS}"
       GF_SERVER_ROOT_URL: "https://$DANVPN_DOMAIN/grafana/"
     volumes:
       - $DANVPN_VOLUME/grafana:/var/lib/grafana
@@ -307,8 +358,12 @@ services:
         ipv4_address: "${GRAFANA_HOST}"
     restart: unless-stopped
     depends_on:
+      metrics-init:
+        condition: service_completed_successfully
       nginx:
         condition: service_healthy
+      influxdb:
+        condition: service_started
     deploy:
       resources:
         limits:
@@ -334,8 +389,8 @@ services:
       TEST_WEB: "http://127.0.0.1/healthcheck"
     volumes:
       - $DANVPN_VOLUME/nginx/certs:/etc/letsencrypt
-      - $DANVPN_VOLUME/nginx/data/nginx.conf:/etc/nginx/nginx.conf:ro
-      - $DANVPN_VOLUME/nginx/data/proxy.conf:/etc/nginx/conf.d/proxy.conf:ro
+      - ./.config/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./.config/nginx/proxy.conf:/etc/nginx/conf.d/proxy.conf:ro
     networks:
       - internal
       - metrics
